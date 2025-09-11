@@ -11,7 +11,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@truffle/hdwallet-provider": "^1.7.0",
+        "@truffle/hdwallet-provider": "^1.5.0",
         "axios": "^1.6.6",
         "bcrypt": "^5.1.1",
         "cors": "^2.8.5",
@@ -22,7 +22,7 @@
         "moment-timezone": "^0.5.45",
         "mongoose": "^8.2.1",
         "node-cron": "^3.0.3",
-        "node-fetch": "^2.7.0",
+        "node-fetch": "^3.0.0",
         "nodemo": "^1.0.0",
         "pino": "^8.18.0",
         "qrcode": "^1.5.3",

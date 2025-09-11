@@ -1,12 +1,9 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const wyzconfiigSchema = new Schema(
+const confiigSchema = new Schema(
   {
       lastSyncBlock: { type:  Number,required: true },
-      wyz_price: { type:  Number },
-      governance_date: { type:  Date },
-      rank_income : { type: Number },
       updatedAt: {
         type: Date,
         default: Date.now,
@@ -14,6 +11,6 @@ const wyzconfiigSchema = new Schema(
   }
 );
 
-const wyzconfiig = mongoose.model("confiig4", wyzconfiigSchema);
+const confiig = mongoose.model("confiig", confiigSchema);
 
-module.exports = wyzconfiig;
+module.exports = confiig;

@@ -30,12 +30,11 @@ async function connect() {
     if (process.env.NODE_ENV === "dev") {
       uri = `mongodb://${env.MONGODB_USER}:${env.MONGODB_PASSWORD}@${env.MONGODB_HOST}`;
     } else {
-      uri = `mongodb+srv://${env.MONGODB_USER}:${env.MONGODB_PASSWORD}@${env.MONGODB_HOST}?retryWrites=true&w=majority`;
+      uri = `mongodb+srv://${env.MONGODB_USER}:${env.MONGODB_PASSWORD}@${env.MONGODB_HOST}/${env.MONGODB_DB}?retryWrites=true&w=majority`;
     }
 
     await mongoose.connect(uri, {
       useUnifiedTopology: true, // Use the new URL parser by default
-      dbName: env.MONGODB_DB
     });
 
     logger.info("MongoDB: Connection established successfully");

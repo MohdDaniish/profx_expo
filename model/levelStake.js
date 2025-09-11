@@ -16,11 +16,7 @@ const levelStakeSchema = new Schema({
   },
   amount: {
     type: Number,
-    default: 0
-  },
-  wyz_amount: {
-    type: Number,
-    default: 0
+    required: true
   },
   income: {
     type: Number,
@@ -35,13 +31,6 @@ const levelStakeSchema = new Schema({
   income_status: {
     type: String,
     default: "Credit"
-  },
-  wyzplan: {
-    type: Number,
-    default: 0
-  },
-  token: {
-    type: String
   },
   txHash: {
     type: String,

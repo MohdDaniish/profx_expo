@@ -13,8 +13,24 @@ const { verifyToken } = require("../Middleware/jwtToken");
 const stakeReward = require("../model/stakingReward");
 const stakePool = require("../model/stakepool");
 const recurrtransfer = require("../model/recurrtransfer");
-const poolincometransfer = require("../model/poolincometransfer");
-const updateWithdraw = require("../model/updateWithdraw");
+
+const Web3 = require("web3");
+const notification = require("../model/notification");
+require('dotenv').config();
+
+const web3 = new Web3(
+  new Web3.providers.HttpProvider(process.env.RPC_URL, {
+    reconnect: {
+      auto: true,
+      delay: 5000, // ms
+      maxAttempts: 15,
+      onTimeout: false,
+    },
+  })
+);
+
+const ABI = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"investor","type":"address"},{"indexed":false,"internalType":"uint256","name":"netAmt","type":"uint256"}],"name":"MemberPayment","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"referrer","type":"address"},{"indexed":false,"internalType":"uint256","name":"userId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"referrerId","type":"uint256"},{"indexed":false,"internalType":"string","name":"regby","type":"string"}],"name":"Registration","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"token","type":"uint256"},{"indexed":false,"internalType":"string","name":"plan","type":"string"},{"indexed":false,"internalType":"string","name":"tyyp","type":"string"},{"indexed":false,"internalType":"uint256","name":"plantype","type":"uint256"}],"name":"Stake","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"token","type":"uint256"},{"indexed":false,"internalType":"string","name":"plan","type":"string"}],"name":"ToppedUp","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"inputs":[],"name":"DSC","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"LASTLEVEL","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PERCENT_DIVIDER","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TIME_STEP","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"USDT","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"admin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"adminAchivers","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"airdropAmount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"airdropLevelShares","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"airdropPerMonth","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"airdropUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"path","type":"address[]"}],"name":"getCurrentPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amountUsd","type":"uint256"}],"name":"getPriceFromUniswapV2","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"idToAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_usdt","type":"address"},{"internalType":"address","name":"_dsc","type":"address"},{"internalType":"address","name":"_stdsc","type":"address"},{"internalType":"address","name":"_owner","type":"address"}],"name":"initialize","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isAdminAchived","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isAirdropPaused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"isUserExists","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"joiningFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastUserId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"levelBonusShares","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"levelRoiPerDay","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"levelShare","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxStake","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minStake","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minWithdraw","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"multipler","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address payable[]","name":"_contributors","type":"address[]"},{"internalType":"uint256[]","name":"_balances","type":"uint256[]"},{"internalType":"uint256","name":"totalQty","type":"uint256"},{"internalType":"contract IERC20","name":"_TKN","type":"address"}],"name":"multisendToken","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"operator","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referral","type":"address"}],"name":"registerbyDSC","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referral","type":"address"}],"name":"registerbystDSC","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"address","name":"_referral","type":"address"}],"name":"registrationUSDT","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"roiPerDay","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"stDSC","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"plan","type":"uint256"}],"name":"stakeDSC","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"plan","type":"uint256"}],"name":"stakeUSDT","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"plan","type":"uint256"}],"name":"stakestDSC","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"totalStaked","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalWithdrawal","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"uniswapRouter","outputs":[{"internalType":"contract IUniswapV2Router02","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"users","outputs":[{"internalType":"uint256","name":"userId","type":"uint256"},{"internalType":"address","name":"referrer","type":"address"},{"internalType":"uint256","name":"partnerCount","type":"uint256"},{"internalType":"uint256","name":"totalStake","type":"uint256"},{"internalType":"uint256","name":"directBusiness","type":"uint256"},{"internalType":"uint256","name":"teamBusiness","type":"uint256"},{"internalType":"uint256","name":"lastinvest","type":"uint256"},{"internalType":"uint256","name":"rewTaken","type":"uint256"},{"internalType":"uint256","name":"stakecount","type":"uint256"},{"internalType":"uint256","name":"partnersCount","type":"uint256"},{"internalType":"uint256","name":"levelIncome","type":"uint256"},{"internalType":"bool","name":"onof","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"WithAmt","type":"uint256"}],"name":"withdrawLost","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"QtyAmt","type":"uint256"},{"internalType":"contract IERC20","name":"_TOKEN","type":"address"}],"name":"withdrawLostTokenFromBalance","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+const contract = new web3.eth.Contract(ABI, process.env.DSC_STAKE_CONTRACT);
 
 const limit = 100;
 
@@ -77,7 +93,6 @@ router.get("/deposite", verifyToken, async (req, res) => {
           ratio: 1,
           txHash: 1,
           createdAt: 1,
-          wyz_rate: 1,
           Name: "$joinedData.name",
         },
       },
@@ -123,7 +138,7 @@ router.get("/withdraw-referal", verifyToken, async (req, res) => {
     if (searchQuery) {
       filter.$or = [
         { user: { $regex: searchQuery, $options: "i" } },
-        { "joinedData.name": { $regex: searchQuery, $options: "i" } },
+        { "joinedData.userId": { $regex: searchQuery, $options: "i" } },
       ];
     }
 
@@ -132,18 +147,17 @@ router.get("/withdraw-referal", verifyToken, async (req, res) => {
         $match: {
           wallet_type: "referral",
           isapprove: false,
-          isreject: false,
-          ...paymentFilter,
+          isreject: false
         },
       },
       {
         $lookup: {
-          from: "signup",
+          from: "registration",
           let: { userId: "$user" },
           pipeline: [
             {
               $match: {
-                $expr: { $eq: ["$wallet_add", "$$userId"] },
+                $expr: { $eq: ["$user", "$$userId"] },
               },
             },
           ],
@@ -199,7 +213,6 @@ router.get("/withdraw-referal", verifyToken, async (req, res) => {
           isapprove: 1,
           isreject: 1,
           trxnHash: 1,
-          isfailed: 1,
           Name: "$joinedData.name",
         },
       },
@@ -226,7 +239,7 @@ router.get("/withdraw-referal", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/withdraw-roi", verifyToken, async (req, res) => {
+router.get("/withdraw-roi",verifyToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 2;
@@ -247,27 +260,26 @@ router.get("/withdraw-roi", verifyToken, async (req, res) => {
     if (searchQuery) {
       filter.$or = [
         { user: { $regex: searchQuery, $options: "i" } },
-        { "joinedData.name": { $regex: searchQuery, $options: "i" } },
+        { "joinedData.userId": { $regex: searchQuery, $options: "i" } },
       ];
     }
 
     const totalCountPipeline = [
       {
         $match: {
-          wallet_type: "roi",
+          wallet_type: "referral",
           isapprove: false,
-          isreject: false,
-          ...paymentFilter,
+          isreject: false
         },
       },
       {
         $lookup: {
-          from: "signup",
+          from: "registration",
           let: { userId: "$user" },
           pipeline: [
             {
               $match: {
-                $expr: { $eq: ["$wallet_add", "$$userId"] },
+                $expr: { $eq: ["$user", "$$userId"] },
               },
             },
           ],
@@ -279,29 +291,141 @@ router.get("/withdraw-roi", verifyToken, async (req, res) => {
       { $count: "totalCount" },
     ];
 
-    const totalCountResult = await WithdrawalModel.aggregate(
-      totalCountPipeline
-    );
-    const totalCount =
-      totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
+   
+  const totalUser=await WithdrawalModel.find(
+    {isapprove : false, isreject : false}
+  ).countDocuments()
 
-    const dataPipeline = [
+  const tokenPrice = await contract.methods.getCurrentPrice([
+    '0x55d398326f99059fF775485246999027B3197955',
+    '0xE0eAe74BEc76696Cc82dF119Ea35653506D54155'
+  ]).call();
+
+  // Calculate the number of tokens to be received
+  console.log("tokenPrice ",tokenPrice / 1e18)
+//const data=await WithdrawalModel.find({isapprove : false, isreject : false}).skip((page - 1)*pageSize).limit(pageSize).sort({createdAt : -1})
+
+const totalCountResult = await WithdrawalModel.aggregate(
+  totalCountPipeline
+);
+const totalCount =
+  totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
+
+const dataPipeline = [
+  {
+    $match: {
+      isapprove: false,
+      isreject: false,
+      ...paymentFilter,
+    },
+  },
+  {
+    $lookup: {
+      from: "registration",
+      let: { userId: "$user" },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ["$user", "$$userId"] },
+          },
+        },
+      ],
+      as: "joinedData",
+    },
+  },
+  { $unwind: { path: "$joinedData", preserveNullAndEmptyArrays: true } },
+  { $match: filter },
+  {
+    $project: {
+      _id: 1,
+      user: 1,
+      withdrawAmount: 1,
+      createdAt: 1,
+      isapprove: 1,
+      isreject: 1,
+      trxnHash: 1,
+      wallet_type: 1,
+      Name: "$joinedData.userId",
+    },
+  },
+  { $sort: { createdAt: -1 } },
+  { $skip: (page - 1) * limit },
+  { $limit: limit },
+];
+
+const data = await WithdrawalModel.aggregate(dataPipeline);
+console.log("data withdrawal  ",data)
+const updatedRecords = data.map(record => {
+  const tokens_received = record.withdrawAmount * (tokenPrice / 1e18);
+  record.tokens_received = tokens_received; // Assuming you want to add this field to the record
+  return {
+    ...record,
+    tokens_received, // Adding this field directly to the returned object
+  };
+});
+
+await Promise.all(updatedRecords);
+
+//const tokens_received = amount * (tokenPrice / 1e18);
+  
+   
+    return res.json({
+      status: 200,
+      error: false,
+      data,
+      totalCount : totalUser,
+    });
+  } catch (error) {
+    console.log("Error In Withdraw Roi", error);
+    return res.status(500).json({
+      status: 500,
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/withdraw-roi-confirm",verifyToken, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 2;
+    const limit = pageSize;
+    const searchQuery = req.query.search ? req.query.search.trim() : "";
+    const payment = req.query.paymentMethod
+      ? req.query.paymentMethod.trim()
+      : "";
+
+    let paymentFilter = {};
+    if (payment) {
+      paymentFilter.payment_method = payment;
+    }
+
+    let filter = {
+      ...paymentFilter,
+    };
+    if (searchQuery) {
+      filter.$or = [
+        { user: { $regex: searchQuery, $options: "i" } },
+        { "joinedData.userId": { $regex: searchQuery, $options: "i" } },
+        { trxnHash: { $regex: searchQuery, $options: "i" } } // 🔎 search by txHash also
+      ];
+    }
+
+    const totalCountPipeline = [
       {
         $match: {
-          wallet_type: "roi",
-          isapprove: false,
-          isreject: false,
-          ...paymentFilter,
+          // isapprove: true,
+          // isreject: false
         },
       },
       {
         $lookup: {
-          from: "signup",
+          from: "registration",
           let: { userId: "$user" },
           pipeline: [
             {
               $match: {
-                $expr: { $eq: ["$wallet_add", "$$userId"] },
+                $expr: { $eq: ["$user", "$$userId"] },
               },
             },
           ],
@@ -310,34 +434,120 @@ router.get("/withdraw-roi", verifyToken, async (req, res) => {
       },
       { $unwind: { path: "$joinedData", preserveNullAndEmptyArrays: true } },
       { $match: filter },
-      {
-        $project: {
-          _id: 1,
-          user: 1,
-          withdrawAmount: 1,
-          wallet_type: 1,
-          recurr_status: 1,
-          createdAt: 1,
-          payment_method: 1,
-          recurr_status: 1,
-          isapprove: 1,
-          isreject: 1,
-          trxnHash: 1,
-          isfailed: 1,
-          Name: "$joinedData.name",
-        },
-      },
-      { $sort: { createdAt: -1 } },
-      { $skip: (page - 1) * limit },
-      { $limit: limit },
+      { $count: "totalCount" },
     ];
 
-    const data = await WithdrawalModel.aggregate(dataPipeline);
+ 
+const totalCountResult = await WithdrawalModel.aggregate(
+  totalCountPipeline
+);
+const totalCount =
+  totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
+
+const dataPipeline = [
+  {
+    $match: {
+      // isapprove: true,
+      // isreject: false,
+      ...paymentFilter,
+    },
+  },
+  {
+    $lookup: {
+      from: "registration",
+      let: { userId: "$user" },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ["$user", "$$userId"] },
+          },
+        },
+      ],
+      as: "joinedData",
+    },
+  },
+  { $unwind: { path: "$joinedData", preserveNullAndEmptyArrays: true } },
+  { $match: filter },
+  {
+    $project: {
+      _id: 1,
+      user: 1,
+      withdrawAmount: 1,
+      createdAt: 1,
+      isapprove: 1,
+      isreject: 1,
+      trxnHash: 1,
+      wallet_type: 1,
+      withdrawToken: 1,
+      sendToken: 1,
+      Name: "$joinedData.userId",
+    },
+  },
+  { $sort: { createdAt: -1 } },
+  { $skip: (page - 1) * limit },
+  { $limit: limit },
+];
+
+const data = await WithdrawalModel.aggregate(dataPipeline);
+
+//const tokens_received = amount * (tokenPrice / 1e18);
+  
+   
     return res.json({
       status: 200,
       error: false,
       data,
-      totalCount,
+      totalUser : totalCount,
+    });
+  } catch (error) {
+    console.log("Error In Withdraw Roi", error);
+    return res.status(500).json({
+      status: 500,
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/withdraw-roi-confirmm",verifyToken, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 2;
+    const limit = pageSize;
+    const searchQuery = req.query.search ? req.query.search.trim() : "";
+    const payment = req.query.paymentMethod
+      ? req.query.paymentMethod.trim()
+      : "";
+
+    let paymentFilter = {};
+    if (payment) {
+      paymentFilter.payment_method = payment;
+    }
+
+    let filter = {
+      ...paymentFilter,
+    };
+    if (searchQuery) {
+      filter.$or = [
+        { user: { $regex: searchQuery, $options: "i" } },
+      ];
+    }
+
+   
+const totalUser=await WithdrawalModel.find(
+  {isapprove : true, isreject : false}
+).countDocuments()
+
+const data=await WithdrawalModel.find({isapprove : true, isreject : false}).skip((page - 1)*pageSize).limit(pageSize).sort({createdAt : -1})
+
+
+  
+   
+    return res.json({
+      status: 200,
+      error: false,
+      data,
+      totalUser,
     });
   } catch (error) {
     console.log("Error In Withdraw Roi", error);
@@ -394,127 +604,192 @@ router.get("/withdraw-user", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/all-data", verifyToken, async (req, res) => {
+router.get("/all-data", async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const searchQuery = req.query.search || "";
-  const limit = 100;
+  const limit = 20; // Number of documents per page
   const skip = (page - 1) * limit;
+  const searchQuery = req.query.search || "";
+  const planfilter = req.query.planwise || ""; 
+  const idstatus = req.query.idstatus || ""; 
 
-  let filter = {};
-  if (searchQuery) {
-    filter = {
-      $or: [
-        { user: { $regex: searchQuery, $options: "i" } },
-        { userId: { $regex: searchQuery, $options: "i" } },
-      ],
-    };
-  }
   try {
-    const totalUsers = await stakeRegister.countDocuments();
+    // Build the search filter if a search query is provided
+    let filter = {};
+    if (searchQuery) {
+      filter.$or = [
+        { user: { $regex: searchQuery, $options: "i" } }, // Case-insensitive search for user
+        { userId: { $regex: searchQuery, $options: "i" } } // Case-insensitive search for userId
+      ];
+    }
 
-    const data = await registration.aggregate([
-      {
-        $match: filter,
-      },
-      {
-        $sort: {
-          createdAt: -1,
-        },
-      },
+    if (planfilter) {
+      if (planfilter === 'beginner') {
+          filter.$and = [
+              { stake_amount: { $gt: 60 } },
+              { stake_amount: { $lt: 1000 } }
+          ];
+      } else if (planfilter === 'learner') {
+          filter.$and = [
+              { stake_amount: { $gt: 1000 } },
+              { stake_amount: { $lt: 3000 } }
+          ];
+      } else if (planfilter === 'expert') {
+          filter.$and = [
+              { stake_amount: { $gt: 3000 } },
+              { stake_amount: { $lt: 10000 } }
+          ];
+      }
+  }
 
-      {
-        $lookup: {
-          from: "stakeregisters",
-          localField: "user",
-          foreignField: "user",
-          as: "stakeregisters_data",
-        },
-      },
-      {
-        $unwind: {
-          path: "$stakeregisters_data",
-        },
-      },
-      {
-        $lookup: {
-          from: "signup",
-          localField: "stakeregisters_data.user",
-          foreignField: "wallet_add",
-          as: "signup_data",
-        },
-      },
-      {
-        $unwind: {
-          path: "$signup_data",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
+    // Count total number of documents in the collection based on the filter
+    let totalUsers = await registration.countDocuments(filter);
 
-      {
-        $lookup: {
-          from: "stake2",
-          let: { user: "$user" },
-          pipeline: [
-            { $match: { $expr: { $eq: ["$user", "$$user"] } } },
-            { $project: { token: 1, ratio: 1, amount: 1, wyz_rate: 1 } },
-            { $sort: { _id: 1 } },
-            { $limit: 1 },
-          ],
-          as: "additional_data",
-        },
-      },
-      {
-        $unwind: {
-          path: "$additional_data",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $skip: skip,
-      },
-      {
-        $limit: limit,
-      },
-      {
-        $project: {
-          userId: 1,
-          referrerId: 1,
-          name: "$signup_data.name",
-          phone: "$signup_data.phone",
-          level: 1,
-          position: 1,
-          directStakeCount: 1,
-          directStakeCount: "$directStakeCount",
-          stakedirectbusiness: "$directplusteambiz",
-          staketeambusiness: "$staketeambusiness",
-          user: "$stakeregisters_data.user",
-          stake_amount: "$stakeregisters_data.stake_amount",
-          topup_amount: "$stakeregisters_data.topup_amount",
-          createdAt: "$stakeregisters_data.createdAt",
-          rank: "$stakeregisters_data.rank",
-          rankbonus: "$stakeregisters_data.rankbonus",
-          poolIncome: "$stakeregisters_data.poolIncome",
-          poolbonus: "$stakeregisters_data.poolbonus",
-          token: "$additional_data.token",
-          ratio: "$additional_data.ratio",
-          amount: "$additional_data.amount",
-          wyz_rate: "$additional_data.wyz_rate",
-        },
-      },
-    ]);
+    // Fetch data with pagination, filtering, and sorting by createdAt in descending order
+    const data = await registration.find(filter)
+      .sort({ createdAt: -1 }) // Sort by createdAt descending
+      .skip(skip)
+      .limit(limit);
 
+      let filteredData = [];
+let documentCount = 0;
+
+if (idstatus) {
+
+  const documentAllcount = await registration.aggregate([
+    {
+      $match: {
+        return: { $ne: 0 } // Exclude documents where 'return' is 0
+      }
+    },
+    {
+      $addFields: {
+        percentage: {
+          $multiply: [
+            { $divide: ["$totalIncome", "$return"] },
+            100
+          ]
+        }
+      }
+    },
+    {
+      $match: {
+        $expr: {
+          $cond: {
+            if: { $eq: [idstatus, "below"] },
+            then: { $lt: ["$percentage", 25] },
+            else: {
+              $cond: {
+                if: { $eq: [idstatus, "half_done"] },
+                then: { $and: [{ $gte: ["$percentage", 25] }, { $lte: ["$percentage", 50] }] },
+                else: { $gt: ["$percentage", 50] }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]);
+  
+  // Find the length of the resulting array
+  documentCount = documentAllcount.length;
+  
+  filteredData = await registration.aggregate([
+    {
+      $match: {
+        return: { $ne: 0 } // Exclude documents where 'return' is 0
+      }
+    },
+    {
+      $addFields: {
+        percentage: {
+          $multiply: [
+            { $divide: ["$totalIncome", "$return"] },
+            100
+          ]
+        }
+      }
+    },
+    {
+      $match: {
+        $expr: {
+          $cond: {
+            if: { $eq: [idstatus, "below"] },
+            then: { $lt: ["$percentage", 25] },
+            else: {
+              $cond: {
+                if: { $eq: [idstatus, "half_done"] },
+                then: { $and: [{ $gte: ["$percentage", 25] }, { $lte: ["$percentage", 50] }] },
+                else: { $gt: ["$percentage", 50] }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      $sort: { createdAt: -1 } // Sort by createdAt in descending order
+    },
+    {
+      $skip: skip // Skip the first `skip` number of documents
+    },
+    {
+      $limit: limit // Limit the result to `limit` number of documents
+    }
+  ])
+  
+} else {
+  filteredData = data; // Return an empty array if no idstatus provided
+}
+
+for (let i = 0; i < filteredData.length; i++) {
+  const item = filteredData[i];
+  const userAddress = item.user;
+
+  const stakeData = await stake2.aggregate([
+    { $match: { user: userAddress } },
+    {
+      $group: {
+        _id: "$plan",
+        totalAmount: { $sum: "$amount" }
+      }
+    }
+  ]);
+
+  // Default values
+  let stDSCAmount = 0;
+  let DSCAmount = 0;
+  let USDTAmount = 0;
+
+  // Assign from stakeData
+  stakeData.forEach(entry => {
+    if (entry._id === 'stDSC') stDSCAmount = entry.totalAmount * 2;
+    if (entry._id === 'DSC') DSCAmount = entry.totalAmount * 2;
+    if (entry._id === 'USDT') USDTAmount = entry.totalAmount * 2;
+  });
+
+  // If document is Mongoose doc, convert it to plain object before modifying
+  const userData = item.toObject ? item.toObject() : item;
+
+  // Merge staking info
+  filteredData[i] = {
+    ...userData,
+    stDSCAmount,
+    DSCAmount,
+    USDTAmount
+  };
+}
+    // Return the data with total users count
     return res.json({
       status: 200,
-      data,
-      totalUsers,
+      data : filteredData,
+      totalUsers : documentCount > 0 ? documentCount : totalUsers,
     });
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({ status: 500, message: "Internal Server Error" });
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
   }
 });
+
 
 router.post("/withdraw-block", verifyToken, async (req, res) => {
   try {
@@ -563,69 +838,18 @@ router.post("/withdraw-block", verifyToken, async (req, res) => {
 
 router.get("/block-list", verifyToken, async (req, res) => {
   try {
-    let page = parseInt(req.query.page) || 1;
-    let search = req.query.search || "";
-
-    let filter = {};
-    if (search) {
-      filter = {
-        $or: [{ user: { $regex: search, $options: "i" } }],
-      };
-    }
-    const totalUser = await stakeRegister
-      .find({ withdraw_status: 1, ...filter })
-      .countDocuments();
-    const data = await stakeRegister.aggregate([
-      {
-        $match: {
-          withdraw_status: 1,
-          ...filter,
-        },
-      },
-      {
-        $lookup: {
-          from: "signup",
-          localField: "user",
-          foreignField: "wallet_add",
-          as: "signup_data",
-        },
-      },
-      {
-        $unwind: "$signup_data",
-      },
-      {
-        $project: {
-          _id: 0,
-          name: "$signup_data.name",
-          userId: "$signup_data.userId",
-          user: 1,
-          createdAt: 1,
-        },
-      },
-      {
-        $sort: {
-          createdAt: -1,
-        },
-      },
-      {
-        $skip: (page - 1) * 100,
-      },
-      {
-        $limit: 100,
-      },
-    ]);
+    const data = await stakeRegister.find({ withdraw_status: 1 });
 
     return res.json({
       status: 200,
       data,
-      totalUser,
     });
   } catch (error) {
     console.log(error);
   }
 });
 
-router.get("/commission-user", verifyToken, async (req, res) => {
+router.get("/commission-user", async (req, res) => {
   let user = req.query.user;
   try {
     const requireobject = {
@@ -658,14 +882,13 @@ router.get("/commission-user", verifyToken, async (req, res) => {
       { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
     ]);
 
-    // const teamBussines = result.length > 0 ? result[0].totalAmount : 0;
+    const teamBussines = result.length > 0 ? result[0].totalAmount : 0;
 
     const users = await stakeRegister.findOne({ user: user }, requireobject);
     const records = await registration
       .find({ referrer: user })
       .sort({ directplusteambiz: -1 })
       .exec();
-
     let seventyPercentOfHighest = 0;
     if (records.length > 0) {
       const highestValue = records[0].directplusteambiz;
@@ -678,12 +901,6 @@ router.get("/commission-user", verifyToken, async (req, res) => {
         .reduce((acc, record) => acc + record.directplusteambiz, 0);
       thirtyPercentOfRemainingSum = remainingSum;
     }
-
-    const teamBuss = await registration.find(
-      { user, user },
-      { _id: 0, staketeambusiness: 1 }
-    );
-    const teamBussines = teamBuss[0]?.staketeambusiness;
 
     if (!users) {
       return res.json({
@@ -796,217 +1013,7 @@ router.get("/protocol-details", verifyToken, async (req, res) => {
         },
       },
     ]);
-    const firstWyzTotal = await stake2.aggregate([
-      {
-        $match: {
-          $or: [{ ratio: "10" }, { ratio: 10 }],
-          token: "WYZ-stUSDT",
-        },
-      },
-      {
-        $addFields: {
-          withdrawAmount: {
-            $cond: {
-              if: { $gt: ["$wyz_rate", 0] },
-              then: { $divide: [{ $multiply: ["$amount", 0.1] }, "$wyz_rate"] },
-              else: 0,
-            },
-          },
-        },
-      },
-      {
-        $group: {
-          _id: 0,
-          totalWithdrawAmount: { $sum: "$withdrawAmount" },
-        },
-      },
-    ]);
 
-    const secondWyzTotal = await stake2.aggregate([
-      {
-        $match: {
-          $or: [{ ratio: "20" }, { ratio: 20 }],
-          token: "WYZ-stUSDT",
-        },
-      },
-      {
-        $addFields: {
-          withdrawAmount: {
-            $cond: {
-              if: { $gt: ["$wyz_rate", 0] },
-              then: { $divide: [{ $multiply: ["$amount", 0.2] }, "$wyz_rate"] },
-              else: 0,
-            },
-          },
-        },
-      },
-      {
-        $group: {
-          _id: 0,
-          totalWithdrawAmount: { $sum: "$withdrawAmount" },
-        },
-      },
-    ]);
-
-    const thirdWyzTotal = await stake2.aggregate([
-      {
-        $match: {
-          $or: [{ ratio: "30" }, { ratio: 30 }],
-          token: "WYZ-stUSDT",
-        },
-      },
-      {
-        $addFields: {
-          withdrawAmount: {
-            $cond: {
-              if: { $gt: ["$wyz_rate", 0] },
-              then: { $divide: [{ $multiply: ["$amount", 0.3] }, "$wyz_rate"] },
-              else: 0,
-            },
-          },
-        },
-      },
-      {
-        $group: {
-          _id: 0,
-          totalWithdrawAmount: { $sum: "$withdrawAmount" },
-        },
-      },
-    ]);
-
-    const fouthWyzTotal = await stake2.aggregate([
-      {
-        $match: {
-          $or: [{ ratio: "40" }, { ratio: 40 }],
-          token: "WYZ-stUSDT",
-        },
-      },
-      {
-        $addFields: {
-          withdrawAmount: {
-            $cond: {
-              if: { $gt: ["$wyz_rate", 0] },
-              then: { $divide: [{ $multiply: ["$amount", 0.4] }, "$wyz_rate"] },
-              else: 0,
-            },
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalWithdrawAmount: { $sum: "$withdrawAmount" },
-        },
-      },
-    ]);
-
-    const fifthWyzTotal = await stake2.aggregate([
-      {
-        $match: {
-          $or: [{ ratio: "50" }, { ratio: 50 }],
-          token: "WYZ-stUSDT",
-        },
-      },
-      {
-        $addFields: {
-          withdrawAmount: {
-            $cond: {
-              if: { $gt: ["$wyz_rate", 0] },
-              then: { $divide: [{ $multiply: ["$amount", 0.5] }, "$wyz_rate"] },
-              else: 0,
-            },
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalWithdrawAmount: { $sum: "$withdrawAmount" },
-        },
-      },
-    ]);
-
-    const sixthWyzTotal = await stake2.aggregate([
-      {
-        $match: {
-          $or: [{ ratio: "15" }, { ratio: 15 }],
-          token: "sUSDT-stUSDT",
-        },
-      },
-      {
-        $addFields: {
-          withdrawAmount: {
-            $cond: {
-              if: { $gt: ["$wyz_rate", 0] },
-              then: {
-                $divide: [{ $multiply: ["$amount", 0.15] }, "$wyz_rate"],
-              },
-              else: 0,
-            },
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalWithdrawAmount: { $sum: "$withdrawAmount" },
-        },
-      },
-    ]);
-
-    const sevenWyzTotal = await stake2.aggregate([
-      {
-        $match: {
-          $or: [{ ratio: "20" }, { ratio: 20 }],
-          token: "sUSDT-stUSDT",
-        },
-      },
-      {
-        $addFields: {
-          withdrawAmount: {
-            $cond: {
-              if: { $gt: ["$wyz_rate", 0] },
-              then: { $divide: [{ $multiply: ["$amount", 0.2] }, "$wyz_rate"] },
-              else: 0,
-            },
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalWithdrawAmount: { $sum: "$withdrawAmount" },
-        },
-      },
-    ]);
-
-    const eigthWyzTotal = await stake2.aggregate([
-      {
-        $match: {
-          $or: [{ ratio: "25" }, { ratio: 25 }],
-          token: "sUSDT-stUSDT",
-        },
-      },
-      {
-        $addFields: {
-          withdrawAmount: {
-            $cond: {
-              if: { $gt: ["$wyz_rate", 0] },
-              then: {
-                $divide: [{ $multiply: ["$amount", 0.25] }, "$wyz_rate"],
-              },
-              else: 0,
-            },
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalWithdrawAmount: { $sum: "$withdrawAmount" },
-        },
-      },
-    ]);
     const firstdata = firstProtocol[0]?.total;
     const seconddata = secondProtocol[0]?.total;
     const thirddata = thirdProtocol[0]?.total;
@@ -1027,24 +1034,6 @@ router.get("/protocol-details", verifyToken, async (req, res) => {
         sixdata,
         sevendata,
         eightdata,
-        totalWyzFirst:
-          firstWyzTotal.length > 0 ? firstWyzTotal[0]?.totalWithdrawAmount : 0,
-        totalWyzSecond:
-          secondWyzTotal.length > 0
-            ? secondWyzTotal[0]?.totalWithdrawAmount
-            : 0,
-        totalWyzThird:
-          thirdWyzTotal.length > 0 ? thirdWyzTotal[0]?.totalWithdrawAmount : 0,
-        totalWyzFourth:
-          fouthWyzTotal.length > 0 ? fouthWyzTotal[0]?.totalWithdrawAmount : 0,
-        totalWyzFifth:
-          fifthWyzTotal.length > 0 ? fifthWyzTotal[0]?.totalWithdrawAmount : 0,
-        totalWyzSixth:
-          sixthWyzTotal.length > 0 ? sixthWyzTotal[0]?.totalWithdrawAmount : 0,
-        totalWyzSeven:
-          sevenWyzTotal.length > 0 ? sevenWyzTotal[0]?.totalWithdrawAmount : 0,
-        totalWyzEight:
-          eigthWyzTotal.length > 0 ? eigthWyzTotal[0]?.totalWithdrawAmount : 0,
       },
     });
   } catch (error) {
@@ -1213,11 +1202,10 @@ router.get("/topup-data", verifyToken, async (req, res) => {
         },
       },
       {
-        $skip: skip,
-      },
-      {
-        $limit: limit,
-      },
+        $skip:skip
+      },{
+        $limit:limit
+      }
     ]);
     return res.json({
       status: 200,
@@ -1229,22 +1217,10 @@ router.get("/topup-data", verifyToken, async (req, res) => {
   }
 });
 
-async function getTotalTeam(user, page, limit, sortField1, sortField2, search) {
+async function getTotalTeam(user, page, limit, sortField1, sortField2) {
   try {
     if (user) {
       let skip = (page - 1) * limit;
-      let filterStages = [];
-      if (search) {
-        filterStages.push({
-          $match: {
-            $or: [
-              { "children.userId": { $regex: search, $options: "i" } },
-              { "userDetails.name": { $regex: search, $options: "i" } },
-              { "children.user": { $regex: search, $options: "i" } },
-            ],
-          },
-        });
-      }
       let total = await registration.aggregate([
         { $match: { user: user } },
         {
@@ -1259,7 +1235,6 @@ async function getTotalTeam(user, page, limit, sortField1, sortField2, search) {
           },
         },
         { $unwind: "$children" },
-        ...filterStages,
         { $group: { _id: null, count: { $sum: 1 } } },
       ]);
 
@@ -1277,7 +1252,6 @@ async function getTotalTeam(user, page, limit, sortField1, sortField2, search) {
           },
         },
         { $unwind: "$children" },
-        ...filterStages,
         {
           $group: {
             _id: "$children._id",
@@ -1289,8 +1263,8 @@ async function getTotalTeam(user, page, limit, sortField1, sortField2, search) {
             teamCount: { $first: "$children.teamCount" },
             wysStaked: { $first: "$children.wysStaked" },
             timestamp: { $first: "$children.timestamp" },
-            directplusteambiz: { $first: "$children.directplusteambiz" },
-            staketeambusiness: { $first: "$children.staketeambusiness" },
+            directplusteambiz:{$first: "$children.directplusteambiz"},
+            staketeambusiness:{$first: "$children.staketeambusiness"},
             level: { $first: { $add: ["$children.level", 1] } },
           },
         },
@@ -1376,7 +1350,7 @@ async function getTotalTeam(user, page, limit, sortField1, sortField2, search) {
             let: { user_var: "$user" },
             pipeline: [
               { $match: { $expr: { $eq: ["$user", "$$user_var"] } } },
-              { $project: { token: 1, ratio: 1, amount: 1, wyz_rate: 1 } },
+              { $project: { token: 1, ratio: 1, amount: 1 } },
               { $sort: { createdAt: 1 } },
               { $limit: 1 },
             ],
@@ -1401,7 +1375,6 @@ async function getTotalTeam(user, page, limit, sortField1, sortField2, search) {
             preserveNullAndEmptyArrays: true,
           },
         },
-
         {
           $addFields: {
             referrerId: "$user_Details.referrerId",
@@ -1410,13 +1383,12 @@ async function getTotalTeam(user, page, limit, sortField1, sortField2, search) {
             txHash: "$user_Details.txHash",
             teamBusiness20level: "$user_Details.teamBusiness20level",
             stakeamount: "$stakeregisters_data.stake_amount",
-            totalStak: "$stakeregisters_data.topup_amount",
+            totalStak:"$stakeregisters_data.topup_amount",
             topup: "$topup2_data.totalAmount",
             stakingAmount: "$staking2_data.totalAmount",
             rankdata: "$stakeregisters_data.rank",
             token: "$staking2_latest.token",
             ratio: "$staking2_latest.ratio",
-            wyz_rate: "$staking2_latest.wyz_rate",
             amountfirst: "$staking2_latest.amount",
           },
         },
@@ -1468,7 +1440,6 @@ router.get("/team-list", async (req, res) => {
   let user = req.query.user;
   let page = req.query.page;
   let limit = req.query.limit;
-  const search = req.query.search ? req.query.search.trim() : "";
   let sortField1 = req.query.sortField1;
   let sortField2 = req.query.sortField2;
   try {
@@ -1477,8 +1448,7 @@ router.get("/team-list", async (req, res) => {
       page,
       limit,
       sortField1,
-      sortField2,
-      search
+      sortField2
     );
     return res.json({
       status: 200,
@@ -1497,8 +1467,10 @@ router.get("/team-list", async (req, res) => {
   }
 });
 
-router.post("/approve-withdraw", verifyToken, async (req, res) => {
-  const { user, txHash, id } = req.body;
+router.post("/approve-withdrawOld", async (req, res) => {
+  const { user, txHash, id, amount } = req.body;
+  console.log("txHash ",txHash)
+  console.log("id ",id)
   const timestamp = moment().format("YYYY-MM-DDTHH:mm:ss.SSSZ");
   try {
     const result = await WithdrawalModel.updateMany(
@@ -1521,7 +1493,62 @@ router.post("/approve-withdraw", verifyToken, async (req, res) => {
   }
 });
 
-router.post("/reject-withdraw", verifyToken, async (req, res) => {
+router.post("/approve-withdraw", async (req, res) => {
+  const { user, txHash, id, rate, amount } = req.body; 
+  console.log("txHash ", txHash);
+  console.log("id ", id);
+  const timestamp = moment().format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+
+  try {
+    // Ensure id and rate arrays have the same length
+    if (id.length !== amount.length) {
+      return res.json({
+        status: 400,
+        message: "The number of ids and rates must be the same.",
+      });
+    }
+
+    // Update each document individually
+    const updatePromises = id.map((itemId, index) => 
+      WithdrawalModel.updateOne(
+        { _id: itemId },
+        { 
+          $set: { 
+            isapprove: true, 
+            trxnHash: txHash, 
+            timestamp: timestamp,
+            sendToken: amount[index] // Set rate from the corresponding index
+          }
+        }
+      )
+    );
+
+    // Wait for all updates to complete
+    const results = await Promise.all(updatePromises);
+
+    // Check if at least one document was updated
+    const modifiedCount = results.reduce((count, result) => count + result.modifiedCount, 0);
+    if (modifiedCount > 0) {
+      return res.json({
+        status: 200,
+        message: "Withdraw Approved Successfully",
+      });
+    } else {
+      return res.json({
+        status: 400,
+        message: "No records were updated!",
+      });
+    }
+  } catch (error) {
+    console.log("Error in approve withdraw", error);
+    return res.json({
+      status: 500,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.post("/reject-withdraw", async (req, res) => {
   const { user, amount, id } = req.body;
 
   try {
@@ -1530,45 +1557,30 @@ router.post("/reject-withdraw", verifyToken, async (req, res) => {
       { $set: { isreject: true } }
     );
 
-    if (users) {
-      const walletUpdate = await stakeRegister.updateOne(
-        { user: user },
-        { $inc: { wallet_referral: amount, totalWithdraw: -amount } }
-      );
-      console.log("reject-withdraw api", walletUpdate);
+    if (users.modifiedCount > 0) {
+      const udeta = await WithdrawalModel.findOne({ _id : id })
+      const wallet_type = udeta.wallet_type;
+      if(wallet_type === "working"){
+      // const walletUpdate = await registration.updateOne(
+      //   { user: user },
+      //   { $inc: { walletreg_income: amount, totalRegWithdraw: -amount } }
+      // );
+      // console.log("reject-withdraw api",walletUpdate)
       return res.json({
         status: 200,
         message: "Withdraw Rejected Successfully",
       });
-    } else {
-      return res.json({
-        status: 400,
-        message: "Something went wrong !",
-      });
-    }
-  } catch (error) {
-    console.log("Error in reject withdraw", error);
-    return res.json({
-      status: 500,
-      message: "Internel Error !",
-    });
-  }
-});
-
-router.post("/failed-withdraw", verifyToken, async (req, res) => {
-  const { id } = req.body;
-
-  try {
-    const users = await WithdrawalModel.updateMany(
-      { _id: { $in: id } },
-      { $set: { isfailed: true } }
-    );
-
-    if (users) {
+    } else if(wallet_type === "nonworking"){
+      // const walletUpdate = await registration.updateOne(
+      //   { user: user },
+      //   { $inc: { wallet_income: amount, totalWithdraw: -amount } }
+      // );
+      // console.log("reject-withdraw api",walletUpdate)
       return res.json({
         status: 200,
-        // message: "Withdraw Rejected Successfully",
+        message: "Withdraw Rejected Successfully",
       });
+    }
     } else {
       return res.json({
         status: 400,
@@ -1583,30 +1595,42 @@ router.post("/failed-withdraw", verifyToken, async (req, res) => {
     });
   }
 });
+router.post("/rejectall-with_hash", async (req, res) => {
+  const { ids, hash } = req.body; // Expecting ids as an array
 
-router.post("/update-withdraw", verifyToken, async (req, res) => {
-  const { txHash, id } = req.body;
-  const timestamp = moment().format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.json({
+      status: 400,
+      message: "Invalid request, IDs must be an array.",
+    });
+  }
+
   try {
     const result = await WithdrawalModel.updateMany(
-      { _id: { $in: id } },
-      { $set: { isapprove: true, trxnHash: txHash, timestamp: timestamp } }
+      { _id: { $in: ids } }, // Match all IDs in the array
+      { $set: { isreject: true, isapprove: true, trxnHash: hash } }
     );
-    if (result) {
+
+    if (result.modifiedCount > 0) {
       return res.json({
         status: 200,
-        message: "Withdraw Update Successfully",
+        message: ids.length+" Withdraws Rejected Successfully",
       });
     } else {
       return res.json({
         status: 400,
-        message: "Something went wrong !",
+        message: "No records updated, check if the IDs are correct.",
       });
     }
   } catch (error) {
-    console.log("Error in approve withdraw", error);
+    console.log("Error in reject withdraw", error);
+    return res.json({
+      status: 500,
+      message: "Internal Error!",
+    });
   }
 });
+
 
 router.post("/reject-roi-withdraw", async (req, res) => {
   const { user, amount, id } = req.body;
@@ -1902,153 +1926,102 @@ async function getOfferData(user, startDate, endDate) {
     const start = moment(startDate).utc().toDate();
     const end = moment(endDate).utc().toDate();
 
-    const [recentStakes, topup, withdraw] = await Promise.all([
-      stake2.find({ createdAt: { $gte: start, $lte: end } }).select("user"),
-      topup2.find({ createdAt: { $gte: start, $lte: end } }).select("user"),
-      WithdrawalModel.find({ createdAt: { $gte: start, $lte: end } }).select(
-        "user"
-      ),
-    ]);
+    const recentStakes = await stake2
+      .find({
+        createdAt: { $gte: start, $lte: end },
+      })
+      .select("user");
+    const topup = await topup2
+      .find({
+        createdAt: { $gte: start, $lte: end },
+      })
+      .select("user");
 
     const recentStake2Users = recentStakes.map((stake) => stake.user);
     const topupdata = topup.map((stake) => stake.user);
-    const totalWithdraw = withdraw.map((stake) => stake.user);
 
-    const [total_team, topupTeam, total_withdraw] = await Promise.all([
-      registration.aggregate([
-        { $match: { user: user } },
-        {
-          $graphLookup: {
-            from: "registration",
-            startWith: "$user",
-            connectFromField: "user",
-            connectToField: "referrer",
-            maxDepth: 40,
-            depthField: "level",
-            as: "children",
-          },
+    let total_team = await registration.aggregate([
+      { $match: { user: user } },
+      {
+        $graphLookup: {
+          from: "registration",
+          startWith: "$user",
+          connectFromField: "user",
+          connectToField: "referrer",
+          maxDepth: 19,
+          depthField: "level",
+          as: "children",
         },
-        { $unwind: "$children" },
-        { $match: { "children.user": { $in: recentStake2Users } } },
-        {
-          $lookup: {
-            from: "stake2",
-            localField: "children.user",
-            foreignField: "user",
-            as: "stake2_data",
-          },
+      },
+      { $unwind: "$children" },
+      { $match: { "children.user": { $in: recentStake2Users } } },
+      {
+        $lookup: {
+          from: "stake2",
+          localField: "children.user",
+          foreignField: "user",
+          as: "stake2_data",
         },
-        { $unwind: "$stake2_data" },
-        { $match: { "stake2_data.createdAt": { $gte: start, $lte: end } } },
-        {
-          $group: {
-            _id: 0,
-            stakes: {
-              $push: {
-                amount: "$stake2_data.amount",
-                ratio: "$stake2_data.ratio",
-                token: "$stake2_data.token",
-                wyz_rate: "$stake2_data.wyz_rate",
-              },
+      },
+      { $unwind: "$stake2_data" },
+      { $match: { "stake2_data.createdAt": { $gte: start, $lte: end } } },
+      {
+        $group: {
+          _id: 0,
+          stakes: {
+            $push: {
+              amount: "$stake2_data.amount",
+              ratio: "$stake2_data.ratio",
+              token: "$stake2_data.token",
             },
           },
         },
-      ]),
-      registration.aggregate([
-        { $match: { user: user } },
-        {
-          $graphLookup: {
-            from: "registration",
-            startWith: "$user",
-            connectFromField: "user",
-            connectToField: "referrer",
-            maxDepth: 40,
-            depthField: "level",
-            as: "children",
+      },
+    ]);
+    const topupTeam = await registration.aggregate([
+      { $match: { user: user } },
+      {
+        $graphLookup: {
+          from: "registration",
+          startWith: "$user",
+          connectFromField: "user",
+          connectToField: "referrer",
+          maxDepth: 19,
+          depthField: "level",
+          as: "children",
+        },
+      },
+      { $unwind: "$children" },
+      { $match: { "children.user": { $in: topupdata } } },
+      {
+        $lookup: {
+          from: "topup2",
+          localField: "children.user",
+          foreignField: "user",
+          as: "topup_data",
+        },
+      },
+      { $unwind: "$topup_data" },
+      { $match: { "topup_data.createdAt": { $gte: start, $lte: end } } },
+      {
+        $group: {
+          _id: 0,
+          topups: {
+            $push: {
+              amount: "$topup_data.amount",
+              topup_data: "$topup_data.topup_data",
+              protocol: "$topup_data.protocol",
+            },
           },
         },
-        { $unwind: "$children" },
-        { $match: { "children.user": { $in: topupdata } } },
-        {
-          $lookup: {
-            from: "topup2",
-            localField: "children.user",
-            foreignField: "user",
-            as: "topup_data",
-          },
-        },
-        { $unwind: "$topup_data" },
-        { $match: { "topup_data.createdAt": { $gte: start, $lte: end } } },
-        {
-          $group: {
-            _id: null,
-            totalAmount: { $sum: "$topup_data.amount" },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            totalAmount: 1,
-          },
-        },
-      ]),
-      registration.aggregate([
-        { $match: { user: user } },
-        {
-          $graphLookup: {
-            from: "registration",
-            startWith: "$user",
-            connectFromField: "user",
-            connectToField: "referrer",
-            maxDepth: 40,
-            depthField: "level",
-            as: "children",
-          },
-        },
-        { $unwind: "$children" },
-        {
-          $lookup: {
-            from: "withdrawals",
-            localField: "children.user",
-            foreignField: "user",
-            as: "withdrawals_data",
-          },
-        },
-        {
-          $unwind: {
-            path: "$withdrawals_data",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        { $match: { "children.user": { $in: totalWithdraw } } },
-        {
-          $match: { "withdrawals_data.timestamp": { $gte: start, $lte: end } },
-        },
-        { $match: { "withdrawals_data.isapprove": true } },
-        {
-          $group: {
-            _id: 0,
-            totalAmount: { $sum: "$withdrawals_data.withdrawAmount" },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            totalAmount: { $ifNull: ["$totalAmount", 0] },
-          },
-        },
-      ]),
+      },
     ]);
 
-    const teamTopupAmount = topupTeam[0]?.totalAmount || 0;
-    const totalWithdrawdata = total_withdraw[0]?.totalAmount || 0;
+    const teamTopupAmount = topupTeam[0]
+      ? topupTeam[0].topups.reduce((acc, topup) => acc + topup.amount, 0)
+      : 0;
 
-    return {
-      totalTeam: total_team,
-      topupTeam,
-      teamTopupAmount,
-      totalWithdrawdata,
-    };
+    return { totalTeam: total_team, toupdata: topupTeam, teamTopupAmount };
   } catch (error) {
     console.error("Error in getOfferData", error);
     return false;
@@ -2082,7 +2055,6 @@ function processStakeData(data) {
     (total, stake) => total + stake.amount,
     0
   );
-
   const ratioMultiplier = {
     10: 0.1,
     20: 0.2,
@@ -2092,53 +2064,43 @@ function processStakeData(data) {
   };
 
   const totalWYZByProtocol = filteredStakes.reduce((acc, stake) => {
-    if (stake.token == "WYZ-stUSDT") {
-      const ratio = ratioMultiplier[stake.ratio];
-      if (!ratio) return acc;
+    const ratio = ratioMultiplier[stake.ratio];
+    if (!ratio) return acc;
 
-      let factor = ratio;
+    let factor = ratio;
 
-      const partialValue = (stake.amount * factor) / stake?.wyz_rate;
-      if (!acc[stake.ratio]) {
-        acc[stake.ratio] = 0;
-      }
+    const partialValue = (stake.amount * factor) / 20;
 
-      acc[stake.ratio] += partialValue;
+    if (!acc[stake.ratio]) {
+      acc[stake.ratio] = 0;
     }
+
+    acc[stake.ratio] += partialValue;
+
     return acc;
   }, {});
 
   const toalwyz = filteredStakes.reduce((acc, stake) => {
-    if (stake.ratio == "10" && stake.token == "WYZ-stUSDT")
-      return acc + (stake.amount * 0.1) / stake?.wyz_rate;
-    if (stake.ratio == "20" && stake.token == "WYZ-stUSDT")
-      return acc + (stake.amount * 0.2) / stake?.wyz_rate;
-    if (stake.ratio == "30" && stake.token == "WYZ-stUSDT")
-      return acc + (stake.amount * 0.3) / stake?.wyz_rate;
-    if (stake.ratio == "40" && stake.token == "WYZ-stUSDT")
-      return acc + (stake.amount * 0.4) / stake?.wyz_rate;
-    if (stake.ratio == "50" && stake.token == "WYZ-stUSDT")
-      return acc + (stake.amount * 0.5) / stake?.wyz_rate;
-    if (stake.ratio == "15" && stake.token == "WYZ-stUSDT")
-      return acc + (stake.amount * 0.15) / stake?.wyz_rate;
+    if (stake.ratio == "10") return acc + (stake.amount * 0.1) / 20;
+    if (stake.ratio == "20") return acc + (stake.amount * 0.2) / 20;
+    if (stake.ratio == "30") return acc + (stake.amount * 0.3) / 20;
+    if (stake.ratio == "40") return acc + (stake.amount * 0.4) / 20;
+    if (stake.ratio == "50") return acc + (stake.amount * 0.5) / 20;
+    if (stake.ratio == "15" && stake.token == "sUSDT-stUSDT")
+      return acc + (stake.amount * 0.15) / 20;
     if (stake.ratio == "20" && stake.token == "sUSDT-stUSDT")
-      return acc + (stake.amount * 0.2) / stake?.wyz_rate;
+      return acc + (stake.amount * 0.2) / 20;
     if (stake.ratio == "25" && stake.token == "sUSDT-stUSDT")
-      return acc + (stake.amount * 0.25) / stake?.wyz_rate;
+      return acc + (stake.amount * 0.25) / 20;
     return acc;
   }, 0);
 
   const toalstusdt = filteredStakes.reduce((acc, stake) => {
-    if (stake.ratio == "10" && stake.token == "WYZ-stUSDT")
-      return acc + stake.amount * 0.9;
-    if (stake.ratio == "20" && stake.token == "WYZ-stUSDT")
-      return acc + stake.amount * 0.8;
-    if (stake.ratio == "20" && stake.token == "WYZ-stUSDT")
-      return acc + stake.amount * 0.7;
-    if (stake.ratio == "40" && stake.token == "WYZ-stUSDT")
-      return acc + stake.amount * 0.6;
-    if (stake.ratio == "50" && stake.token == "WYZ-stUSDT")
-      return acc + stake.amount * 0.5;
+    if (stake.ratio == "10") return acc + stake.amount * 0.9;
+    if (stake.ratio == "20") return acc + stake.amount * 0.8;
+    if (stake.ratio == "30") return acc + stake.amount * 0.7;
+    if (stake.ratio == "40") return acc + stake.amount * 0.6;
+    if (stake.ratio == "50") return acc + stake.amount * 0.5;
     if (stake.ratio == "15" && stake.token == "sUSDT-stUSDT")
       return acc + stake.amount * 0.85;
     if (stake.ratio == "20" && stake.token == "sUSDT-stUSDT")
@@ -2156,20 +2118,19 @@ function processStakeData(data) {
     50: 0.5,
   };
   const totalstudtProtocol = filteredStakes.reduce((acc, stake) => {
-    if (stake.token == "WYZ-stUSDT") {
-      const ratio = ratioMultiplierstusdt[stake.ratio];
-      if (!ratio) return acc;
+    const ratio = ratioMultiplierstusdt[stake.ratio];
+    if (!ratio) return acc;
 
-      let factor = ratio;
+    let factor = ratio;
 
-      const partialValue = stake.amount * factor;
+    const partialValue = stake.amount * factor;
 
-      if (!acc[stake.ratio]) {
-        acc[stake.ratio] = 0;
-      }
-
-      acc[stake.ratio] += partialValue;
+    if (!acc[stake.ratio]) {
+      acc[stake.ratio] = 0;
     }
+
+    acc[stake.ratio] += partialValue;
+
     return acc;
   }, {});
 
@@ -2190,7 +2151,7 @@ function processStakeData(data) {
     const ratio = ratiusdtWYZ[stake.ratio];
     if (!ratio) return acc;
 
-    const partialValue = (stake.amount * ratio) / stake?.wyz_rate;
+    const partialValue = stake.amount * ratio;
 
     if (!acc[stake.ratio]) {
       acc[stake.ratio] = 0;
@@ -2253,13 +2214,14 @@ function processStakeData(data) {
 
 router.post("/team-data", async (req, res) => {
   const { user, startDate, endDate } = req.body;
+
   try {
     const users = await registration.findOne(
       { user: user },
       { userId: 1, _id: 0 }
     );
-
-    let { totalTeam, teamTopupAmount, totalWithdrawdata } = await getOfferData(
+    console.log(user, "users");
+    let { totalTeam, teamTopupAmount } = await getOfferData(
       user,
       startDate,
       endDate
@@ -2327,7 +2289,6 @@ router.post("/team-data", async (req, res) => {
         },
       },
     ]);
-
     const totalTopupAmount =
       totaltopup.length > 0 ? totaltopup[0].totalAmount : 0;
 
@@ -2345,7 +2306,6 @@ router.post("/team-data", async (req, res) => {
       totalStudtUSDT,
       totalWYSusdt,
       totalByProtocol,
-      totalWithdrawdata,
       data: users?.userId,
     });
   } catch (e) {
@@ -2384,7 +2344,6 @@ router.get("/fifty-fifty", verifyToken, async (req, res) => {
         },
       },
       { $unwind: { path: "$joinedData", preserveNullAndEmptyArrays: true } },
-
       { $match: filter },
       { $count: "totalCount" },
     ]);
@@ -2400,36 +2359,6 @@ router.get("/fifty-fifty", verifyToken, async (req, res) => {
         },
       },
       { $unwind: { path: "$joinedData", preserveNullAndEmptyArrays: true } },
-
-      {
-        $lookup: {
-          from: "stakeregisters",
-          localField: "user",
-          foreignField: "user",
-          as: "stakeregisters_data",
-        },
-      },
-      {
-        $unwind: {
-          path: "$stakeregisters_data",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "registration",
-          localField: "user",
-          foreignField: "user",
-          as: "registration_data",
-        },
-      },
-      {
-        $unwind: {
-          path: "$registration_data",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-
       {
         $match: {
           $or: [
@@ -2441,15 +2370,13 @@ router.get("/fifty-fifty", verifyToken, async (req, res) => {
       {
         $project: {
           user: 1,
+          timestamp: 1,
           amount: 1,
           token: 1,
           ratio: 1,
           txHash: 1,
           createdAt: 1,
           Name: "$joinedData.name",
-          totalWithdraw: "$stakeregisters_data.totalWithdraw",
-          teamBusiness: "$registration_data.staketeambusiness",
-          directplusteambiz: "$registration_data.directplusteambiz",
         },
       },
       { $sort: { timestamp: -1 } },
@@ -2584,11 +2511,25 @@ router.get("/withdraw-info", verifyToken, async (req, res) => {
             $or: [{ ratio: "10" }, { ratio: 10 }],
           },
         },
-
+        {
+          $group: {
+            _id: "$user",
+            tokens: { $addToSet: "$token" },
+            ratios: { $addToSet: "$ratio" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $match: {
+            tokens: ["WYZ-stUSDT"],
+            ratios: { $in: ["10", 10], $size: 1 },
+            count: 1,
+          },
+        },
         {
           $lookup: {
             from: "withdrawals",
-            localField: "user",
+            localField: "_id",
             foreignField: "user",
             as: "lookupResult_data",
           },
@@ -2621,11 +2562,23 @@ router.get("/withdraw-info", verifyToken, async (req, res) => {
             $or: [{ ratio: "20" }, { ratio: 20 }],
           },
         },
-
+        {
+          $group: {
+            _id: "$user",
+            tokens: { $addToSet: "$token" },
+            ratios: { $addToSet: "$ratio" },
+          },
+        },
+        {
+          $match: {
+            tokens: ["WYZ-stUSDT"],
+            ratios: { $size: 1, $in: ["20", 20] },
+          },
+        },
         {
           $lookup: {
             from: "withdrawals",
-            localField: "user",
+            localField: "_id",
             foreignField: "user",
             as: "lookupResult_data",
           },
@@ -2658,11 +2611,23 @@ router.get("/withdraw-info", verifyToken, async (req, res) => {
             $or: [{ ratio: "30" }, { ratio: 30 }],
           },
         },
-
+        {
+          $group: {
+            _id: "$user",
+            tokens: { $addToSet: "$token" },
+            ratios: { $addToSet: "$ratio" },
+          },
+        },
+        {
+          $match: {
+            tokens: ["WYZ-stUSDT"],
+            ratios: { $size: 1, $in: ["30", 30] },
+          },
+        },
         {
           $lookup: {
             from: "withdrawals",
-            localField: "user",
+            localField: "_id",
             foreignField: "user",
             as: "lookupResult_data",
           },
@@ -2695,11 +2660,23 @@ router.get("/withdraw-info", verifyToken, async (req, res) => {
             $or: [{ ratio: "40" }, { ratio: 40 }],
           },
         },
-
+        {
+          $group: {
+            _id: "$user",
+            tokens: { $addToSet: "$token" },
+            ratios: { $addToSet: "$ratio" },
+          },
+        },
+        {
+          $match: {
+            tokens: ["WYZ-stUSDT"],
+            ratios: { $size: 1, $in: ["40", 40] },
+          },
+        },
         {
           $lookup: {
             from: "withdrawals",
-            localField: "user",
+            localField: "_id",
             foreignField: "user",
             as: "lookupResult_data",
           },
@@ -2735,11 +2712,23 @@ router.get("/withdraw-info", verifyToken, async (req, res) => {
             $or: [{ ratio: "50" }, { ratio: 50 }],
           },
         },
-
+        {
+          $group: {
+            _id: "$user",
+            tokens: { $addToSet: "$token" },
+            ratios: { $addToSet: "$ratio" },
+          },
+        },
+        {
+          $match: {
+            tokens: ["WYZ-stUSDT"],
+            ratios: { $size: 1, $in: ["50", 50] },
+          },
+        },
         {
           $lookup: {
             from: "withdrawals",
-            localField: "user",
+            localField: "_id",
             foreignField: "user",
             as: "lookupResult_data",
           },
@@ -2772,11 +2761,23 @@ router.get("/withdraw-info", verifyToken, async (req, res) => {
             $or: [{ ratio: "15" }, { ratio: 15 }],
           },
         },
-
+        {
+          $group: {
+            _id: "$user",
+            tokens: { $addToSet: "$token" },
+            ratios: { $addToSet: "$ratio" },
+          },
+        },
+        {
+          $match: {
+            tokens: ["sUSDT-stUSDT"],
+            ratios: { $size: 1, $in: ["15", 15] },
+          },
+        },
         {
           $lookup: {
             from: "withdrawals",
-            localField: "user",
+            localField: "_id",
             foreignField: "user",
             as: "lookupResult_data",
           },
@@ -2809,11 +2810,24 @@ router.get("/withdraw-info", verifyToken, async (req, res) => {
             $or: [{ ratio: "20" }, { ratio: 20 }],
           },
         },
-
+        {
+          $group: {
+            _id: "$user",
+            tokens: { $addToSet: "$token" },
+            ratios: { $addToSet: "$ratio" },
+          },
+        },
+        {
+          $match: {
+            tokens: ["sUSDT-stUSDT"],
+            $expr: { $eq: [{ $size: "$ratios" }, 1] },
+            ratios: { $size: 1, $in: ["20", 20] },
+          },
+        },
         {
           $lookup: {
             from: "withdrawals",
-            localField: "user",
+            localField: "_id",
             foreignField: "user",
             as: "lookupResult_data",
           },
@@ -2841,11 +2855,24 @@ router.get("/withdraw-info", verifyToken, async (req, res) => {
             $or: [{ ratio: "25" }, { ratio: 25 }],
           },
         },
-
+        {
+          $group: {
+            _id: "$user",
+            tokens: { $addToSet: "$token" },
+            ratios: { $addToSet: "$ratio" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $match: {
+            tokens: ["sUSDT-stUSDT"],
+            ratios: { $size: 1, $in: ["25", 25] },
+          },
+        },
         {
           $lookup: {
             from: "withdrawals",
-            localField: "user",
+            localField: "_id",
             foreignField: "user",
             as: "lookupResult_data",
           },
@@ -3254,48 +3281,10 @@ router.get("/ruccring-income", verifyToken, async (req, res) => {
 
     const data = await recurrtransfer.aggregate(dataPipeline);
 
-    const csvData = await recurrtransfer.aggregate([
-      {
-        $lookup: {
-          from: "signup",
-          localField: "user",
-          foreignField: "wallet_add",
-          as: "signup_data",
-        },
-      },
-      { $unwind: { path: "$signup_data", preserveNullAndEmptyArrays: true } },
-      { $match: filter },
-      {
-        $project: {
-          _id: 0,
-          name: "$signup_data.name",
-          userId: "$signup_data.userId",
-          user: 1,
-          amount: 1,
-          totalIncome: 1,
-          recurrBalance: 1,
-          createdAt: 1,
-        },
-      },
-      { $sort: { createdAt: -1 } },
-    ]);
-    const modifiedData = csvData.map((item) => {
-      const { name, userId, user, amount, createdAt } = item;
-      const Timestamp = moment(createdAt).format("DD-MM-YYYY HH:mm");
-      return {
-        name,
-        userId,
-        user,
-        amount: amount.toFixed(2),
-        createdAt: Timestamp,
-      };
-    });
-
     return res.json({
       status: 200,
       totalCount,
       data,
-      modifiedData,
     });
   } catch (error) {
     console.log(error, "Ruccring Income");
@@ -3306,530 +3295,225 @@ router.get("/ruccring-income", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/approved-withdraw-csv", verifyToken, async (req, res) => {
-  try {
-    const data = await WithdrawalModel.aggregate([
-      {
-        $match: { wallet_type: "referral", isapprove: true, isreject: false },
-      },
-      {
-        $lookup: {
-          from: "signup",
-          localField: "user",
-          foreignField: "wallet_add",
-          as: "joinedData",
-        },
-      },
-      { $unwind: { path: "$joinedData", preserveNullAndEmptyArrays: true } },
-      {
-        $group: {
-          _id: "$_id",
-          user: { $first: "$user" },
-          withdrawAmount: { $first: "$withdrawAmount" },
-          wallet_type: { $first: "$wallet_type" },
-          recurr_status: { $first: "$recurr_status" },
-          createdAt: { $first: "$createdAt" },
-          payment_method: { $first: "$payment_method" },
-          isapprove: { $first: "$isapprove" },
-          isreject: { $first: "$isreject" },
-          trxnHash: { $first: "$trxnHash" },
-          timestamp: { $first: "$timestamp" },
-          Name: { $first: "$joinedData.name" },
-        },
-      },
-      { $sort: { createdAt: -1 } },
-    ]);
-
-    const ModifiedData = data.map((item) => {
-      const {
-        Name,
-        user,
-        withdrawAmount,
-        wallet_type,
-        createdAt,
-        payment_method,
-        trxnHash,
-        timestamp,
-      } = item;
-      const RequestTime = moment(createdAt)
-        .tz("Asia/Kolkata")
-        .format("DD-MM-YYYY HH:mm");
-      const ApproveTime = timestamp
-        ? moment(timestamp).tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm")
-        : "N/A";
-      return {
-        name: Name,
-        user: user,
-        amount: (withdrawAmount * 0.95).toFixed(2),
-        fess: (withdrawAmount * 0.05).toFixed(2),
-        total: withdrawAmount.toFixed(2),
-        type: wallet_type,
-        method: payment_method,
-        trxnHash: trxnHash,
-        Request: RequestTime,
-        ApproveTime: ApproveTime,
-      };
-    });
+router.post("/add-notification", verifyToken, async (req, res) => {
+  try{
+  const { notify_type, message, criteria } = req.body;
+  
+  if(!notify_type && !message){
     return res.json({
-      status: 200,
-      ModifiedData,
-      data,
-    });
-  } catch (err) {
-    console.log(err, "approved-withdraw-csv");
+      status : 200,
+      message : "Param is required"
+    })
   }
-});
-router.get("/approved-roi-csv", verifyToken, async (req, res) => {
-  try {
-    const data = await WithdrawalModel.aggregate([
-      {
-        $match: { wallet_type: "roi", isapprove: true, isreject: false },
-      },
-      {
-        $lookup: {
-          from: "signup",
-          localField: "user",
-          foreignField: "wallet_add",
-          as: "joinedData",
-        },
-      },
-      { $unwind: { path: "$joinedData", preserveNullAndEmptyArrays: true } },
-      {
-        $group: {
-          _id: "$_id",
-          user: { $first: "$user" },
-          withdrawAmount: { $first: "$withdrawAmount" },
-          wallet_type: { $first: "$wallet_type" },
-          recurr_status: { $first: "$recurr_status" },
-          createdAt: { $first: "$createdAt" },
-          payment_method: { $first: "$payment_method" },
-          isapprove: { $first: "$isapprove" },
-          isreject: { $first: "$isreject" },
-          trxnHash: { $first: "$trxnHash" },
-          timestamp: { $first: "$timestamp" },
-          Name: { $first: "$joinedData.name" },
-        },
-      },
-      { $sort: { createdAt: -1 } },
-    ]);
-    const ModifiedData = data.map((item) => {
-      const {
-        Name,
-        user,
-        withdrawAmount,
-        wallet_type,
-        createdAt,
-        payment_method,
-        trxnHash,
-        timestamp,
-      } = item;
-      const RequestTime = moment(createdAt)
-        .tz("Asia/Kolkata")
-        .format("DD-MM-YYYY HH:mm");
-      const ApproveTime = timestamp
-        ? moment(timestamp).tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm")
-        : "N/A";
-      return {
-        name: Name,
-        user: user,
-        amount: (withdrawAmount * 0.95).toFixed(2),
-        fess: (withdrawAmount * 0.05).toFixed(2),
-        total: withdrawAmount.toFixed(2),
-        type: wallet_type,
-        method: payment_method,
-        trxnHash: trxnHash,
-        Request: RequestTime,
-        ApproveTime: ApproveTime,
-      };
-    });
+  if(notify_type == "target" && !criteria){
     return res.json({
-      status: 200,
-      ModifiedData,
-      data,
-    });
-  } catch (err) {
-    console.log(err, "approved-roi-csv");
+      status : 200,
+      message : "Param is required"
+    })
   }
-});
-
-router.get("/deposite-csv", verifyToken, async (req, res) => {
-  try {
-    const data = await stake2.aggregate([
-      {
-        $lookup: {
-          from: "signup",
-          localField: "user",
-          foreignField: "wallet_add",
-          as: "joinedData",
-        },
-      },
-      { $unwind: { path: "$joinedData", preserveNullAndEmptyArrays: true } },
-
-      {
-        $project: {
-          user: 1,
-          timestamp: 1,
-          amount: 1,
-          token: 1,
-          ratio: 1,
-          txHash: 1,
-          createdAt: 1,
-          wyz_rate: 1,
-          Name: "$joinedData.name",
-        },
-      },
-      { $sort: { createdAt: -1 } },
-    ]);
-    const ModifiedData = data.map((item) => {
-      const { Name, user, amount, ratio, token, txHash, createdAt, wyz_rate } =
-        item;
-      const Timestamp = moment(createdAt)
-        .tz("Asia/Kolkata")
-        .format("DD-MM-YYYY HH:mm");
-      const wyz =
-        ratio == "10"
-          ? ((amount * 0.1) / wyz_rate).toFixed(2)
-          : ratio == "20"
-          ? ((amount * 0.2) / wyz_rate).toFixed(2)
-          : ratio == "30"
-          ? ((amount * 0.3) / wyz_rate).toFixed(2)
-          : ratio == "40"
-          ? ((amount * 0.4) / wyz_rate).toFixed(2)
-          : ratio == "50"
-          ? ((amount * 0.5) / wyz_rate).toFixed(2)
-          : ratio == "15" && token == "sUSDT-stUSDT"
-          ? ((amount * 0.15) / wyz_rate).toFixed(2)
-          : ratio == "20" && token == "sUSDT-stUSDT"
-          ? ((amount * 0.2) / wyz_rate).toFixed(2)
-          : ratio == "25" && token == "sUSDT-stUSDT"
-          ? ((amount * 0.25) / wyz_rate).toFixed(2)
-          : "0.00";
-
-      const stUsdt =
-        ratio == "10"
-          ? (amount * 0.9).toFixed(2)
-          : ratio == "20"
-          ? (amount * 0.8).toFixed(2)
-          : ratio == "30"
-          ? (amount * 0.7).toFixed(2)
-          : ratio == "40"
-          ? (amount * 0.6).toFixed(2)
-          : ratio == "50"
-          ? (amount * 0.5).toFixed(2)
-          : ratio == "15" && token == "sUSDT-stUSDT"
-          ? (amount * 0.85).toFixed(2)
-          : ratio == "20" && token == "sUSDT-stUSDT"
-          ? (amount * 0.8).toFixed(2)
-          : ratio == "25" && token == "sUSDT-stUSDT"
-          ? (amount * 0.75).toFixed(2)
-          : "0.00";
-      return {
-        Name: Name,
-        user: user,
-        wyz: wyz,
-        stUsdt: stUsdt,
-        total: amount,
-        token: token,
-        ratio: ratio,
-        txHash: txHash,
-        createdAt: Timestamp,
-      };
-    });
-    const columns = [
-      { label: "Name", key: "Name" },
-      { label: "User", key: "user" },
-      { label: "WYZ", key: "wyz" },
-      { label: "Stusdt", key: "stUsdt" },
-      { label: "Total", key: "total" },
-      { label: "Token", key: "token" },
-      { label: "Ratio", key: "ratio" },
-      { label: "Transaction ID", key: "txHash" },
-      { label: "Date&Time", key: "createdAt" },
-    ];
+  const isnote = await notification.create({
+    notify_type : notify_type,
+    message : message,
+    criteria : criteria ? criteria : 0
+  })
+  if(isnote){
     return res.json({
-      status: 200,
-      ModifiedData,
-    });
-  } catch (err) {
-    console.log(err, "deposite-csv");
+      status : 200,
+      message : "Notification Added Successfully"
+    })
   }
-});
+  } catch(error){
 
-router.get("/pool-withdraw", verifyToken, async (req, res) => {
+  }
+})
+
+async function generateRandomString(length) {
+  return crypto.randomBytes(Math.ceil(length / 2))
+    .toString('hex') // Convert to hexadecimal format
+    .slice(0, length); // Trim to desired length
+}
+
+router.post("/add-offer-banner", async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const search = (req.query.search || "").trim();
-
-    let filter = {};
-    if (search) {
-      filter = {
-        $or: [
-          { user: { $regex: search, $options: "i" } },
-          { "signUp_data.name": { $regex: search, $options: "i" } },
-        ],
-      };
+    if (!req.file) {
+      return res
+        .status(200)
+        .json({ status: false, message: "No file uploaded." });
+      //   throw new Error('No file uploaded.');
     }
 
-    const totalUser = await poolincometransfer.find(filter).countDocuments();
-    const data = await poolincometransfer.aggregate([
-      {
-        $lookup: {
-          from: "signup",
-          localField: "user",
-          foreignField: "wallet_add",
-          as: "signUp_data",
-        },
-      },
-      {
-        $unwind: "$signUp_data",
-      },
-      {
-        $match: filter,
-      },
-      {
-        $project: {
-          _id: 0,
-          user: 1,
-          amount: 1,
-          return: 1,
-          totalIncome: 1,
-          poolBalance: 1,
-          createdAt: 1,
-          name: "$signUp_data.name",
-          userId: "$signUp_data.userId",
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
-      {
-        $skip: (page - 1) * 100,
-      },
-      {
-        $limit: 100,
-      },
-    ]);
+    // uploading aadhar image
+    var randomUid = generateRandomString(50);
+    const extension = path.extname(req.file.originalname).toLowerCase();
+    randomUid = randomUid + extension;
+    const uploadPath = path.join(__dirname, "../../public/upload", randomUid);
+    require("fs").writeFileSync(uploadPath, req.file.buffer);
 
-    return res.json({
-      status: 200,
-      data,
-      totalUser,
-    });
-  } catch (err) {
-    console.log(err, "pool-withdraw");
-  }
-});
+    //console.log("file_name",req.file.originalname);
 
-router.post("/update-withdraw-income", verifyToken, async (req, res) => {
-  try {
-    const { user, amount, wallet_type, action } = req.body;
-
-    if (!action || (action !== "+" && action !== "-")) {
-      return res.json({
-        status: 400,
-        message: "Invalid Action. Use '+' or '-' only.",
-      });
-    }
-    const data = await stakeRegister.find({ user: user });
-
-    if (data.length == 0) {
-      return res.json({
-        status: 400,
-        message: "User Not Found",
-      });
-    }
-    const changeValue = action == "+" ? amount : -amount;
-
-    const updateResult = await stakeRegister.updateOne(
-      { user: user },
-      { $inc: { [wallet_type]: changeValue } }
+    const filePath = path.join(
+      __dirname,
+      "/../public",
+      "uploads",
+      randomUid
     );
-    if (updateResult) {
-      await updateWithdraw.create({
-        user: user,
-        amount: amount,
-        wallet_type: wallet_type,
-        action: action,
-      });
+    let data = new FormData();
+    data.append("file", fs.createReadStream(filePath));
+   
+   
+        console.log(error);
+        const imagePath = path.join(
+          __dirname,
+          "../public/upload",
+          randomUid
+        );
+        console.log(imagePath);
+        //Helper.deleteFileWithRetry(imagePath);
+      
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+})
+
+router.get("/getDownline", async (req, res) => {
+  try {
+    let userId = req.query.userId;
+     
+    const iddd = await registration.findOne({ userId : userId },{ user : 1 })
+    if(!iddd){
       return res.json({
-        status: 200,
-        message: "Balance updated successfully",
-      });
-    } else {
-      return res.json({
-        status: 500,
-        message: "Failed to update balance",
-      });
+        status : 200,
+        message : "Invalid UserId"
+      })
     }
+
+    userId = iddd.user;
+        console.log("userId ", userId);
+        const page = parseInt(req.query.page) || 1;
+        const limit = 2000; // Number of documents per page
+        const skip = (page - 1) * limit;
+        const searchQuery = req.query.search || "";
+        const planfilter = req.query.planwise || ""; 
+        const idstatus = req.query.idstatus || ""; 
+
+        let alldownusrs = [];
+
+        if (userId) {
+          const downUsersResult = await findAllDescendantsOld(userId);
+          alldownusrs = downUsersResult;
+          //console.log("all users ", alldownusrs);
+        }
+
+        let filteredData = [];
+
+        if (alldownusrs.length > 0) {
+          filteredData = await registration.aggregate([
+            {
+              $match: {
+                user: { $in: alldownusrs }
+                // Removed: return > 0
+              }
+            },
+            {
+              $addFields: {
+                percentage: {
+                  $cond: [
+                    { $and: [{ $ne: ["$return", 0] }, { $ne: ["$return", null] }] },
+                    { $multiply: [{ $divide: ["$totalIncome", "$return"] }, 100] },
+                    0
+                  ]
+                }
+              }
+            },
+            ...(idstatus ? [{
+              $match: {
+                $expr: {
+                  $switch: {
+                    branches: [
+                      {
+                        case: { $eq: [idstatus, "below"] },
+                        then: { $lt: ["$percentage", 25] }
+                      },
+                      {
+                        case: { $eq: [idstatus, "half_done"] },
+                        then: { $and: [{ $gte: ["$percentage", 25] }, { $lte: ["$percentage", 50] }] }
+                      }
+                    ],
+                    default: { $gt: ["$percentage", 50] }
+                  }
+                }
+              }
+            }] : []),
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit }
+          ]);
+        } else {
+          filteredData = [];
+        }
+
+        // Enrich each user with staking data
+        for (let i = 0; i < filteredData.length; i++) {
+          const item = filteredData[i];
+          const userAddress = item.user;
+
+          const stakeData = await stake2.aggregate([
+            { $match: { user: userAddress } },
+            {
+              $group: {
+                _id: "$plan",
+                totalAmount: { $sum: "$amount" }
+              }
+            }
+          ]);
+
+          let stDSCAmount = 0, DSCAmount = 0, USDTAmount = 0;
+          stakeData.forEach(entry => {
+            if (entry._id === 'stDSC') stDSCAmount = entry.totalAmount;
+            if (entry._id === 'DSC') DSCAmount = entry.totalAmount;
+            if (entry._id === 'USDT') USDTAmount = entry.totalAmount;
+          });
+
+          const userData = item.toObject ? item.toObject() : item;
+          filteredData[i] = {
+            ...userData,
+            stDSCAmount,
+            DSCAmount,
+            USDTAmount
+          };
+        }
+
+        return res.json({
+          status: 200,
+          data: filteredData,
+          totalUsers: filteredData.length
+        });
   } catch (error) {
-    console.log(error, "update-withdraw-income");
+    console.log(error);
   }
 });
 
-router.get("/update-income-data", async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
 
-    const totalUser = await updateWithdraw.find({}).countDocuments();
-    const data = await updateWithdraw.aggregate([
-      {
-        $lookup: {
-          from: "signup",
-          localField: "user",
-          foreignField: "wallet_add",
-          as: "signup_data",
-        },
-      },
-      {
-        $unwind: "$signup_data",
-      },
-      {
-        $project: {
-          _id: 0,
-          user: 1,
-          amount: 1,
-          wallet_type: 1,
-          createdAt: 1,
-          action: 1,
-          name: "$signup_data.name",
-        },
-      },
-      {
-        $sort: {
-          createdAt: -1,
-        },
-      },
-      {
-        $skip: (page - 1) * limit,
-      },
-      {
-        $limit: limit,
-      },
+async function findAllDescendantsOld(referrer) {
+  const allUserIds = new Set();
+  let currentLevel = [referrer];
+
+  while (currentLevel.length > 0) {
+    const directMembers = await registration.aggregate([
+      { $match: { referrer: { $in: currentLevel } } },
+      { $group: { _id: null, users: { $addToSet: "$user" } } }
     ]);
 
-    return res.json({
-      status: 200,
-      data: data,
-      totalUser: totalUser,
-    });
-  } catch (error) {
-    console.log(error, "Error In UpdateIncome");
+    if (directMembers.length === 0) {
+      break;
+    }
+
+    currentLevel = directMembers[0].users;
+    currentLevel.forEach(id => allUserIds.add(id));
   }
-});
 
-router.get("/complet3x-team", async (req, res) => {
-  try {
-    const user = req.query.user;
-    const page = req.query.page || 1;
+  return Array.from(allUserIds);
+}
 
-    let total = await registration.aggregate([
-      { $match: { user: user } },
-      {
-        $graphLookup: {
-          from: "registration",
-          startWith: "$user",
-          connectFromField: "user",
-          connectToField: "referrer",
-          maxDepth: 19,
-          depthField: "level",
-          as: "children",
-        },
-      },
-      { $unwind: "$children" },
-      { $group: { _id: null, count: { $sum: 1 } } },
-    ]);
-
-    let total_team = await registration.aggregate([
-      { $match: { user: user } },
-      {
-        $graphLookup: {
-          from: "registration",
-          startWith: "$user",
-          connectFromField: "user",
-          connectToField: "referrer",
-          maxDepth: 19,
-          depthField: "level",
-          as: "children",
-        },
-      },
-      { $unwind: "$children" },
-      {
-        $group: {
-          _id: "$children._id",
-          userId: { $first: "$children.userId" },
-          user: { $first: "$children.user" },
-          createdAt: { $first: "$children.createdAt" },
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
-      { $skip: Number(page - 1) * limit },
-      { $limit: Number(limit) },
-      {
-        $lookup: {
-          from: "signup",
-          localField: "user",
-          foreignField: "wallet_add",
-          as: "userDetails",
-        },
-      },
-      {
-        $unwind: {
-          path: "$userDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $addFields: {
-          phone: "$userDetails.phone",
-          name: "$userDetails.name",
-        },
-      },
-      {
-        $lookup: {
-          from: "stakeregisters",
-          localField: "user",
-          foreignField: "user",
-          as: "stakeregisters_data",
-        },
-      },
-      {
-        $unwind: {
-          path: "$stakeregisters_data",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-
-      {
-        $addFields: {
-          referrerId: "$user_Details.referrerId",
-          stake_amount: "$stakeregisters_data.stake_amount",
-          topup_amount: "$stakeregisters_data.topup_amount",
-          return: "$stakeregisters_data.return",
-          totalIncome: "$stakeregisters_data.totalIncome",
-          totalWithdraw: "$stakeregisters_data.totalWithdraw",
-        },
-      },
-      {
-        $project: {
-          userDetails: 0,
-          user_Details: 0,
-          stakeregisters_data: 0,
-          topup2_data: 0,
-          staking2_data: 0,
-          staking2_latest: 0,
-        },
-      },
-    ]);
-
-    return res.json({
-      status: 200,
-      data: total_team,
-      totalUser: total.length > 0 ? total[0]?.count : 0,
-    });
-  } catch (err) {
-    console.log(err, "Error In complet3x-team");
-  }
-});
 module.exports = router;

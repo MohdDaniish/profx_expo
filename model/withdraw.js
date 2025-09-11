@@ -10,17 +10,25 @@ const withdrawalSchema = new Schema({
     type: Number,
     required: true
   },
+  withdrawToken: {
+    type: Number,
+    required: true
+  },
+  sendToken: {
+    type: Number,
+    default: 0
+  },
+  rate: {
+    type: Number,
+    required: true
+  },
+  pay_rate: {
+    type: Number,
+    default : 0
+  },
   wallet_type: {
     type: String,
     required: true
-  },
-  payment_method: {
-    type: String,
-    required: true
-  },
-  recurr_status : {
-    type: String,
-    default : 0
   },
   isapprove : {
     type: Boolean,
@@ -33,10 +41,6 @@ const withdrawalSchema = new Schema({
   trxnHash : {
     type: String,
     default : null
-  },
-  isfailed: {
-    type: Boolean,
-    default : false
   },
   createdAt: {
     type: Date,

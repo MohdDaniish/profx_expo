@@ -5,12 +5,12 @@ const stakePoolIncomeSchema = new Schema(
   {
       user: { type:  String,required: true },
       amount: { type:  Number,required: true },
-      yourinvestment: { type:  Number,required: true },
       pool: { type:  Number,required: true },
       percent: { type:  Number,required: true },
       txn_id: { type:  String,required: true },
       totalBusiness: { type:  Number,required: true },
       send_status:{type:String,default:0},
+      lapse_status:{type:String,default:0},
       createdAt: {
         type: Date,
         default: Date.now,

@@ -25,7 +25,19 @@ const levelRecurrLapseSchema = new Schema({
   percent: {
     type: String
   },
+  income_status: {
+    type: String,
+    default: "Credit"
+  },
+  monthtilljoin: {
+    type: Number,
+    default: 0
+  },
   directs: {
+    type: Number,
+    default: 0
+  },
+  reqdirects: {
     type: Number,
     default: 0
   },
@@ -33,37 +45,9 @@ const levelRecurrLapseSchema = new Schema({
     type: Number,
     default: 0
   },
-  ranknumber: {
+  reqbiz: {
     type: Number,
     default: 0
-  },
-  prev_biz : {
-    type: Number,
-    default : 0
-  },
-  carry_forward : {
-    type: Number,
-    default : 0
-  },
-  day_past : {
-    type: Number,
-    default : 0
-  },
-  month_past : {
-    type: Number,
-    default : 0
-  },
-  date_start : {
-    type: Date
-  },
-  date_end : {
-    type: Date
-  },
-  prev_start : {
-    type: Date
-  },
-  prev_end : {
-    type: Date
   },
   txHash: {
     type: String

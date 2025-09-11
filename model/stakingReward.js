@@ -4,14 +4,9 @@ const { Schema } = mongoose;
 const stakeRewardSchema = new Schema(
   {
       user: { type:  String,required: true },
-      amount: { type:  Number,required: true },
-      directteam: { type:  Number,required: true },
-      directbusiness: { type:  Number,required: true },
-      teamsize: { type:  Number,required: true },
       targetbusiness: { type:  Number,required: true },
-      seventy : { type:  Number,required: true },
-      thirty : { type:  Number,required: true },
-      rank: { type:  String,required: true },
+      powerleg : { type:  Number,required: true },
+      weakleg : { type:  Number,required: true },
       rankno: { type:  Number,required: true },
       send_status:{type:String,default:0},
       createdAt: {

@@ -19,24 +19,21 @@ const dailyroiSchema = new Schema({
     type: Number,
     required: true
   },
-  ratio: {
-    type: String,
-    required: true
-  },
-  token: {
-    type: String
-  },
   income_status: {
     type: String,
     default: "Credit"
   },
   totalIncome: {
-    type: Number
+    type: String
   },
   capping: {
-    type: Number
+    type: String
   },
-  recurr_status : {
+  level_status : {
+    type: String,
+    default : 0
+  },
+  send_status : {
     type: String,
     default : 0
   },
@@ -51,6 +48,6 @@ const dailyroiSchema = new Schema({
   }
 });
 
-const dailyroi = mongoose.model('dailyroiWYZ', dailyroiSchema);
+const dailyroi = mongoose.model('dailyroi', dailyroiSchema);
 
 module.exports = dailyroi;
