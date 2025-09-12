@@ -45,7 +45,7 @@ const registration = new mongoose.Schema(
     wallet_lapse: {type: Number, default : 0},
     withdraw_status:{type: Number, default : 0},
     name:{type: String, default : null},
-    email:{type: Number, default : null},
+    email:{type: String, default : null},
     txHash: { type: String, required: true, unique: true },
     block: { type: Number, required: true },
     timestamp: { type: Number, required: true },
