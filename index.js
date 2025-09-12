@@ -122,6 +122,8 @@ async function getLastSyncBlock() {
               userId: userId,
               uId: returnValues.userId,
               user: returnValues.user,
+              name: returnValues.name,
+              email: returnValues.email,
               referrerId: referrer.userId?referrer.userId : 0,
               rId: returnValues.referrerId,
               referrer: returnValues.referrer,
