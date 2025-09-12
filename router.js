@@ -4621,8 +4621,186 @@ router.post('/ctohistory', async (req, res) => {
   }
 });
 
-module.exports = router;
 
+router.post("/withdrawWeekly", async (req, res) => {
+  let { walletAddress, amount } = req.body;
+  console.log(walletAddress, "walletAddress");
+
+  if (!walletAddress || !amount) {
+    return res.status(400).json({ success: false, message: "Invalid input" });
+  }
+
+  //const lowerCaseAddress = walletAddress.toLowerCase();
+  const lowerCaseAddress = walletAddress;
+
+  console.log("wall addr ",lowerCaseAddress)
+
+  try {
+    // Locking the walletAddress to prevent concurrent modifications
+    await lock.acquire(lowerCaseAddress, async () => {
+      const fData = await registration.findOne({ user: lowerCaseAddress });
+      console.log(fData, "fData:::");
+      if (!fData) {
+        res.status(200).json({
+          status: 200,
+          message: "User Not Found",
+        });
+      }
+
+      let wall_income = fData.wallet_income;
+
+      if (amount < 10) {
+        res.status(200).json({
+          status: 200,
+          message: "Minimum Withdrawal is 10 POL",
+        });
+      }
+
+      if (wall_income < amount) {
+        res.status(200).json({
+          status: 200,
+          message: "Insufficient Wallet Balance",
+        });
+      }
+
+      amount = amount * 0.90;
+
+      const currentTime = new Date();
+
+      // Add 3 minutes (3 * 60 * 1000 milliseconds)
+      const threeMinutesLater = new Date(currentTime.getTime() + 3 * 60 * 1000);
+
+      // Convert to timestamp in milliseconds
+      const timestampInMilliseconds = threeMinutesLater.getTime();
+      
+      // Generate hash and process withdrawal
+
+      const amountBN = web3.utils.toWei(amount.toString(), "ether");
+
+      console.log("amountBN ",amountBN)
+
+      // usdt to pol
+
+      //const amountInPOL = await convertUSDTToPOL(amount);
+      const amountInPOL = amount * 1e18;
+
+      const randomHash = await contract.methods
+        .getWithdrawHash(walletAddress, amountBN, timestampInMilliseconds)
+        .call();
+      
+      const vrsSign = await processWithdrawal(walletAddress, randomHash, amount);
+
+      return res.status(200).json({
+        success: true,
+        message: "Withdrawal Request Processed Successfully",
+        vrsSign,
+        deadline : timestampInMilliseconds,
+        amountInPOL : amountInPOL
+      });
+    });
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ success: false, message: error.message });
+    }
+    console.error("Withdrawal error:", error.stack || error);
+    return res.status(500).json({ success: false, message: "Server error. Please try again later." });
+  }
+});
+
+async function processWithdrawal(userAddress, hash, amount) {
+ 
+
+  try {
+    const lastWithdrawFund = await WithdrawalModel.findOne({ user:userAddress}).sort({ _id: -1 });
+    console.log(lastWithdrawFund,"lastWithdrawFund::::")
+    let prevNonce = 0;
+    if (!lastWithdrawFund) {
+      prevNonce = -1;
+    } else {
+      prevNonce = lastWithdrawFund.nonce;
+    }
+
+    const currNonce = await contract.methods.nonce(userAddress).call();
+    console.log(currNonce, "currNonce:::,", prevNonce, "currNonce:::111,", Number(currNonce))
+    if (prevNonce + 1 !== Number(currNonce)) {
+      throw new Error("Invalid withdrawal request!");
+    }
+    const vrsSign = await giveVrsForWithdrawLpc(
+      userAddress,
+      hash,
+      Number(currNonce),
+      web3.utils.toWei(amount.toString(), "ether")
+    );
+
+    return vrsSign;
+  } catch (error) {
+    console.error("Error in processWithdrawal:", error);
+    throw error;
+  }
+}
+
+function giveVrsForWithdrawLpc(user, hash, nonce, amount) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const data = {
+        user,
+        amount,
+      };
+
+      const account = web3.eth.accounts.privateKeyToAccount(process.env.Operator_Wallet);
+ 
+      web3.eth.accounts.wallet.add(account);
+      web3.eth.defaultAccount = account.address;
+
+      const signature = await web3.eth.sign(hash, account.address);
+
+      const vrsValue = parseSignature(signature)
+      data["signature"] = vrsValue;
+      resolve({ ...data, amount });
+
+      console.log(data, "data::::")
+    } catch (error) {
+      console.error("Error in signing the message:", error);
+      reject(error);
+    }
+  });
+}
+
+function parseSignature(signature) {
+  
+  const sigParams = signature.substr(2);
+  const v = "0x" + sigParams.substr(64 * 2, 2);
+  const r = "0x" + sigParams.substr(0, 64);
+  const s = "0x" + sigParams.substr(64, 64);
+ 
+  return { v, r, s };
+}
+
+router.get('/random-number', (req, res) => {
+  // Generate a buffer of 50 bytes (to ensure at least 100 digits when converted)
+  const buffer = crypto.randomBytes(50);
+  // Convert to a large number and take first 100 digits
+  const largeNumber = BigInt('0x' + buffer.toString('hex')).toString();
+  // Ensure exactly 100 digits by padding or trimming
+  let randomNumber = largeNumber.padStart(100, '0').slice(0, 100);
+  
+  res.json({
+      randomNumber: randomNumber
+  });
+});
+
+router.get('/userDetailsbyId', async (req, res) => {
+  const userId = req.query.userId
+
+  const idiid = await Registration.findOne({ userId : userId },{ user : 1 })
+  if(!idiid){
+    return res.status(404).send({ message: 'User not found' });
+  }
+  const walletAddress = idiid.user; 
+  res.json({
+    walletAddress: walletAddress
+  });
+});
 
   
   module.exports = router;
