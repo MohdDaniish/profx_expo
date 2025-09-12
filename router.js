@@ -4792,7 +4792,7 @@ router.get('/random-number', (req, res) => {
 router.get('/userDetailsbyId', async (req, res) => {
   const userId = req.query.userId
 
-  const idiid = await Registration.findOne({ userId : userId },{ user : 1 })
+  const idiid = await registration.findOne({ userId : userId },{ user : 1 })
   if(!idiid){
     return res.status(404).send({ message: 'User not found' });
   }
