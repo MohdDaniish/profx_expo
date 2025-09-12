@@ -53,10 +53,10 @@ app.use(
 );
 
 
-app.use("/api",routes)
-app.use("/api",AuthRouter)
-app.use("/api",Adminlogin)
-app.use("/api",Dashboard)
+app.use("/api/profx",routes)
+app.use("/api/profx",AuthRouter)
+app.use("/api/profx",Adminlogin)
+app.use("/api/profx",Dashboard)
 app.use('/banner', express.static(path.join(__dirname, "/public/upload")));
 
 const web3 = new Web3(
