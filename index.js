@@ -116,7 +116,7 @@ async function getLastSyncBlock() {
           let userId = "";
           const randomNumber = Math.floor(Math.random() * 100000);
           const fiveDigitNumber = randomNumber.toString().padStart(5, '0');
-          userId = "DSC" + fiveDigitNumber;
+          userId = "PFX" + fiveDigitNumber;
           try {
             let isCreated = await registration.create({
               userId: userId,
@@ -134,47 +134,7 @@ async function getLastSyncBlock() {
               { uId: returnValues.referrerId },
               { $inc: { directCount: 1 } }
             );
-            // if(isCreated){
-              
-           // direct level income on registration
-              //   const islev = await levelStake.create({
-              //     sender: returnValues.user,
-              //     receiver: returnValues.referrer,
-              //     level: 1,
-              //     amount: 30,
-              //     income: 9,
-              //     percent: 30,
-              //     income_type: "Registration Level Income",
-              //     txHash : transactionHash,
-              //   });
-
-                
-              // if(islev){
-              //   await registration.updateOne({ user : returnValues.referrer }, { $inc : { walletreg_income : 9, levelRegIncome : 9, totalRegIncome : 9 }})
-              // }
-
-              //   const getref2 = await registration.findOne({ user: returnValues.referrer },{ referrer : 1 })
-
-              // if(getref2){
-              // const islev2 = await levelStake.create({
-              //     sender: returnValues.user,
-              //     receiver: getref2.referrer,
-              //     level: 2,
-              //     amount: 30,
-              //     income: 6,
-              //     percent: 20,
-              //     income_type: "Registration Level Income",
-              //     txHash : transactionHash,
-              // });
-
-              // if(islev2){
-              //   await registration.updateOne({ user : getref2.referrer }, { $inc : { walletreg_income : 6, levelRegIncome : 6 , totalRegIncome : 6 }})
-              // }
-              // }
-            // }
-            // if (!isCreated && isUpdated) {
-            //   console.log("something went wrong");
-            // }
+          
           } catch (e) {
             console.log("Error in save reg:", e);
           }
@@ -212,6 +172,7 @@ async function getLastSyncBlock() {
           
           const result = calculateIncomeAndPackage((returnValues.amount/1e18),planname);
           const perday = result.perDayIncome; 
+          const lockin = result.lockinDays;
 
           //console.log("perday :: ",perday)
           const isstalk = await stake2.findOne({ txHash : transactionHash},{ _id : 1})
@@ -224,6 +185,7 @@ async function getLastSyncBlock() {
             plan : returnValues.plan,
             plantype : planname,
             stakeType : returnValues.tyyp,
+            lockindays : lockin,
             txHash: transactionHash,
             block: blockNumber,
             timestamp: timestamp,
@@ -313,46 +275,46 @@ async function getLastSyncBlock() {
             })
            }
            
-           const amti = returnValues.amount/1e18;
-           const incomeref = (10/100)*amti
-           const refregdata = await registration.findOne({ user : getref.referrer },{ return : 1, totalIncome : 1})
-           const nowinc = refregdata.totalIncome + incomeref;
+          //  const amti = returnValues.amount/1e18;
+          //  const incomeref = (10/100)*amti
+          //  const refregdata = await registration.findOne({ user : getref.referrer },{ return : 1, totalIncome : 1})
+          //  const nowinc = refregdata.totalIncome + incomeref;
   
-           if (refregdata.return >= nowinc) {
-           const isadded = await registration.updateOne({ user : getref.referrer, stake_amount : { $gt : 0 } }, { $inc : { wallet_income : incomeref, referalIncome : incomeref , totalIncome : incomeref }})
+          //  if (refregdata.return >= nowinc) {
+          //  const isadded = await registration.updateOne({ user : getref.referrer, stake_amount : { $gt : 0 } }, { $inc : { wallet_income : incomeref, referalIncome : incomeref , totalIncome : incomeref }})
            
-           if(isadded.modifiedCount > 0){
-           await levelStake.create({
-            sender: returnValues.user,
-            receiver: getref.referrer,
-            level: 1,
-            amount: amti,
-            income: incomeref,
-            percent: 10,
-            income_type: "Referral Income",
-            txHash : transactionHash,
-           });
-           }
-          } else {
-            if (refregdata.return > refregdata.totalIncome) {
-              const elig_inc = refregdata.return - refregdata.totalIncome;
-              if (elig_inc > 0) {
-                const isadded = await registration.updateOne({ user : getref.referrer, stake_amount : { $gt : 0 } }, { $inc : { wallet_income : elig_inc, referalIncome : elig_inc , totalIncome : elig_inc }})
-                if(isadded.modifiedCount > 0){
-                  await levelStake.create({
-                    sender: returnValues.user,
-                    receiver: getref.referrer,
-                    level: 1,
-                    amount: amti,
-                    income: elig_inc,
-                    percent: 10,
-                    income_type: "Referral Income",
-                    txHash : transactionHash,
-                   });
-                }
-              }
-            }
-          }
+          //  if(isadded.modifiedCount > 0){
+          //  await levelStake.create({
+          //   sender: returnValues.user,
+          //   receiver: getref.referrer,
+          //   level: 1,
+          //   amount: amti,
+          //   income: incomeref,
+          //   percent: 10,
+          //   income_type: "Referral Income",
+          //   txHash : transactionHash,
+          //  });
+          //  }
+          // } else {
+          //   if (refregdata.return > refregdata.totalIncome) {
+          //     const elig_inc = refregdata.return - refregdata.totalIncome;
+          //     if (elig_inc > 0) {
+          //       const isadded = await registration.updateOne({ user : getref.referrer, stake_amount : { $gt : 0 } }, { $inc : { wallet_income : elig_inc, referalIncome : elig_inc , totalIncome : elig_inc }})
+          //       if(isadded.modifiedCount > 0){
+          //         await levelStake.create({
+          //           sender: returnValues.user,
+          //           receiver: getref.referrer,
+          //           level: 1,
+          //           amount: amti,
+          //           income: elig_inc,
+          //           percent: 10,
+          //           income_type: "Referral Income",
+          //           txHash : transactionHash,
+          //          });
+          //       }
+          //     }
+          //   }
+          // }
             
           } else {
             console.log("something went wrong");
@@ -1510,24 +1472,18 @@ async function withdrawIncome(req, res){
 
 async function levelPercent(i){
   if(i == 1){
-    return 10
+    return 40
   } else if(i == 2){
-    return 5
-  } else if(i >= 3 && i <= 4){
-    return 3
-  } else if(i >= 5 && i <= 7){
-    return 2
-  } else if(i >= 8 && i <= 13){
-      return 1
-  } else if(i >= 14 && i <= 16){
-      return 2
-  } else if(i >= 17 && i <= 18){
-      return 3
-  } else if(i == 19){
-      return 5
-  } else if(i == 20){
+    return 20
+  } else if(i == 3){
     return 10
-  }
+  } else if(i >= 4 && i <= 8){
+    return 5
+  } else if(i >= 9 && i <= 12){
+      return 3
+  } else if(i >= 13 && i <= 20){
+      return 2
+  } 
 }
 
 async function levelPercentRecurr(i){
@@ -2292,38 +2248,41 @@ async function sendPoolReward() {
 //   }
 // }
 
-function calculateIncomeAndPackage(investment,planname) {
-  
+function calculateIncomeAndPackage(investment, planname) {
   let monthlyRate;
   let packageName;
-  if(planname == "Flexi"){
-  if (investment >= 60 && investment <= 1000) {
-      monthlyRate = 0.12; // 6%
-      packageName = "Gold";
-  } else if (investment > 1000 && investment <= 3000) {
-      monthlyRate = 0.12; // 9%
-      packageName = "Platinum";
-  } else if (investment > 3000 && investment <= 10000) {
-      monthlyRate = 0.12; // 12%
-      packageName = "Diamond";
+  let lockinDays;
+
+  if (planname === 1) {
+    monthlyRate = 0.10; // 10% for Precious Metals
+    packageName = "Precious Metals";
+    lockinDays = 90; // 3 months * 30 days
+  } else if (planname === 2) {
+    monthlyRate = 0.15; // 15% for Real Estate
+    packageName = "Real Estate";
+    lockinDays = 180; // 6 months * 30 days
+  } else if (planname === 3) {
+    monthlyRate = 0.20; // 20% for US Stocks
+    packageName = "US Stocks";
+    lockinDays = 360; // 12 months * 30 days
+  } else if (planname === 4) {
+    monthlyRate = 0.24; // 24% for Forex Market
+    packageName = "Forex Market";
+    lockinDays = 720; // 24 months * 30 days
+  } else if (planname === 5) {
+    monthlyRate = 0.30; // 30% for Digital Assets
+    packageName = "Digital Assets";
+    lockinDays = 1080; // 36 months * 30 days
+  } else {
+    throw new Error("Invalid planname provided");
   }
-  } else if(planname == "Fix"){
-    if (investment >= 60 && investment <= 1000) {
-      monthlyRate = 0.12; // 6%
-      packageName = "Gold";
-  } else if (investment >= 1000 && investment <= 3000) {
-      monthlyRate = 0.12; // 9%
-      packageName = "Platinum";
-  } else if (investment > 3000 && investment <= 10000) {
-      monthlyRate = 0.12; // 12%
-      packageName = "Diamond";
-  }
-  }
+
   const perDayIncome = (investment * monthlyRate) / 30; // Assuming 30 days in a month
-  
+
   return {
-      perDayIncome: perDayIncome,
-      packageName: packageName
+    perDayIncome: perDayIncome.toFixed(2), // Round to 2 decimal places for readability
+    packageName: packageName,
+    lockinDays: lockinDays
   };
 }
 
@@ -2350,15 +2309,17 @@ async function levelOnRoi() {
                 let iselig = 0;
                 const directStakeCount = record.directStakeCount ? record.directStakeCount : 0;
 
-                if ((i >= 1 && i <= 3) && directStakeCount >= 1) {
+                if (i >= 1 && directStakeCount >= 1) {
                   iselig = 1;
-                } else if ((i > 3 && i <= 5) && directStakeCount >= 3) {
+                } else if (i >= 2 && directStakeCount >= 2) {
                   iselig = 1;
-                } else if ((i > 5 && i <= 10) && directStakeCount >= 5) {
+                } else if (i >= 3 && directStakeCount >= 3) {
                   iselig = 1;
-                } else if ((i > 10 && i <= 15) && directStakeCount >= 7) {
+                } else if ((i >= 4 && i <= 8) && directStakeCount >= 5) {
                   iselig = 1;
-                } else if ((i > 15 && i <= 20) && directStakeCount >= 10) {
+                } else if ((i >= 9  && i <= 12) && directStakeCount >= 7) {
+                  iselig = 1;
+                } else if ((i >= 13 && i <= 20) && directStakeCount >= 10) {
                   iselig = 1;
                 }
 
@@ -2373,8 +2334,7 @@ async function levelOnRoi() {
 
                   const nowinc = record.totalIncome + incomeData.income;
 
-                  if (record.return >= nowinc) {
-                    console.log("cmoin here")
+                 // if (record.return >= nowinc) {
                     await registration.updateOne(
                       { user: currentReferrerId },
                       {
@@ -2410,12 +2370,12 @@ async function levelOnRoi() {
                       },
                     });
 
-                    const invst = await stake2.findOne({ txHash: rec.txHash }, { incomesent: 1 });
-                    const incper = (invst.incomesent / rec.amount) * 100;
-                    if (incper >= 60) {
-                      await stake2.updateOne({ txHash: rec.txHash }, { $set: { send_status: 1 } });
-                    }
-                  }
+                    // const invst = await stake2.findOne({ txHash: rec.txHash }, { incomesent: 1 });
+                    // const incper = (invst.incomesent / rec.amount) * 100;
+                    // if (incper >= 60) {
+                    //   await stake2.updateOne({ txHash: rec.txHash }, { $set: { send_status: 1 } });
+                    // }
+                  //}
                 }
 
                 i++;

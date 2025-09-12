@@ -19,6 +19,7 @@ const stake2Schema = new Schema(
       regBy:{type:String,default:"Self"},
       incomesent: { type: Number,default:0}, 
       incomesentroi: { type: Number,default:0},
+      lockindays: { type: Number,default:0},
       send_status : { type: String,default : 0},
       txHash: { type:  String,required: true },
       block: { type:  String,required: true },
