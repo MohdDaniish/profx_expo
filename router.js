@@ -4374,7 +4374,7 @@ router.get("/userDetailsbyIdd", async (req, res) => {
      
 
     res.status(200).json({ 
-      userDetails, 
+      walletdetail, 
       levelinc : leveincome,
       yieldincome : dividentinco,
       // clubinc : clubinco,
