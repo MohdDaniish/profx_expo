@@ -4327,7 +4327,7 @@ router.get("/userDetailsbyIdd", async (req, res) => {
     // divident income
     const divres = await dailyroi.aggregate([
       {
-        $match: { user: userDetails.address } // Match the specific receiver
+        $match: { user: address } // Match the specific receiver
       },
       {
         $group: {
