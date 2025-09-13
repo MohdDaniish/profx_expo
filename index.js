@@ -2630,16 +2630,20 @@ cron.schedule('*/2 * * * *', async () => {
  
 });
 
-cron.schedule(
-  "0 1 * * *", // Run at 1:00 AM IST every day
-  () => {
-    roiwallet();
-  },
-  {
-    scheduled: true,
-    timezone: "Asia/Kolkata", // Set the timezone to Asia/Kolkata for IST
-  }
-);
+ cron.schedule('*/50 * * * *', async () => {  // for testing
+ roiwallet();
+ });
+
+// cron.schedule(
+//   "0 1 * * *", // Run at 1:00 AM IST every day
+//   () => {
+//     roiwallet();
+//   },
+//   {
+//     scheduled: true,
+//     timezone: "Asia/Kolkata", // Set the timezone to Asia/Kolkata for IST
+//   }
+// );
 
 cron.schedule(
   "0 4 * * *", // Run at 1:00 AM IST every day
