@@ -1737,8 +1737,8 @@ router.post('/directmember', async (req, res) => {
       // Find the name from the signup schema
      
       // Find the topup_amount from the stageregister schema
-      const stakeRegisterRecord = await stakeRegister.findOne({ user: member.user });
-      const topupAmount = stakeRegisterRecord ? stakeRegisterRecord.topup_amount : 0;
+      const stakeRegisterRecord = await registration.findOne({ user: member.user });
+      const topupAmount = stakeRegisterRecord ? stakeRegisterRecord.stake_amount : 0;
   
       // Add the name and total_staking to the member data
       return {

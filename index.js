@@ -148,14 +148,13 @@ async function getLastSyncBlock() {
         try {
         
           const multi = 3;
-          const plannum = returnValues.plantype
-          let planname;
-          if(plannum == 1){
-            planname = "Flexi";
-          } else if(plannum == 2){
-            planname = "Fix";
-          }
-
+          const plannum = returnValues.plan
+           let planname=plannum;
+          // if(plannum == 1){
+          //   planname = "Flexi";
+          // } else if(plannum == 2){
+          //   planname = "Fix";
+          // }
          
           const stake_referrer = await registration.findOne({ user : returnValues.user },{ referrer : 1,totalIncome : 1, stake_amount : 1, capping : 1, current_plan : 1 })
           const totlinc = stake_referrer.totalIncome;
@@ -182,9 +181,10 @@ async function getLastSyncBlock() {
           let isCreated = await stake.create({
             user: returnValues.user,
             amount: returnValues.amount/1e18,
-            token: returnValues.token,
+            // token: "USDT",
             perdayroi: perday,
             plan : returnValues.plan,
+            planname : result.packageName,
             plantype : planname,
             stakeType : returnValues.tyyp,
             lockindays : lockin,
@@ -2254,24 +2254,24 @@ function calculateIncomeAndPackage(investment, planname) {
   let monthlyRate;
   let packageName;
   let lockinDays;
-
-  if (planname === 1) {
+console.log("planname ",planname)
+  if (planname == 1) {
     monthlyRate = 0.10; // 10% for Precious Metals
     packageName = "Precious Metals";
     lockinDays = 90; // 3 months * 30 days
-  } else if (planname === 2) {
+  } else if (planname == 2) {
     monthlyRate = 0.15; // 15% for Real Estate
     packageName = "Real Estate";
     lockinDays = 180; // 6 months * 30 days
-  } else if (planname === 3) {
+  } else if (planname == 3) {
     monthlyRate = 0.20; // 20% for US Stocks
     packageName = "US Stocks";
     lockinDays = 360; // 12 months * 30 days
-  } else if (planname === 4) {
+  } else if (planname == 4) {
     monthlyRate = 0.24; // 24% for Forex Market
     packageName = "Forex Market";
     lockinDays = 720; // 24 months * 30 days
-  } else if (planname === 5) {
+  } else if (planname == 5) {
     monthlyRate = 0.30; // 30% for Digital Assets
     packageName = "Digital Assets";
     lockinDays = 1080; // 36 months * 30 days
