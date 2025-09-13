@@ -4295,6 +4295,104 @@ router.post('/userDetailsbyWallet', async (req, res) => {
   }
 });
 
+router.get("/userDetailsbyIdd", async (req, res) => {
+  try {
+    const { address } = req.query;
+
+
+    let wallet_balance = 0;
+    const walletdetail = await registration.findOne({ user : address });
+
+    if(walletdetail){
+      wallet_balance = walletdetail.wallet_income
+    }
+
+    if (!userDetails) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+
+    // level income
+    const levincome = await levelStake.aggregate([
+      {
+        $match: { receiver: address } // Match the specific receiver
+      },
+      {
+        $group: {
+          _id: "$receiver",
+          totalIncome: { $sum: "$income" } // Sum the income field
+        }
+      }
+    ]);
+
+    const leveincome = levincome.length > 0 ? levincome[0].totalIncome : 0;
+    // level income
+
+    // divident income
+    const divres = await dailyroi.aggregate([
+      {
+        $match: { user: userDetails.address } // Match the specific receiver
+      },
+      {
+        $group: {
+          _id: "$user",
+          totalIncome: { $sum: "$income" } // Sum the income field
+        }
+      }
+    ]);
+
+    const dividentinco = divres.length > 0 ? divres[0].totalIncome : 0;
+    // divident income
+
+    // club income
+    // const clubres = await ClubIncome.aggregate([
+    //   {
+    //     $match: { user: userDetails.address } // Match the specific receiver
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$user",
+    //       totalIncome: { $sum: "$amount" } // Sum the income field
+    //     }
+    //   }
+    // ]);
+
+    // const clubinco = clubres.length > 0 ? clubres[0].totalIncome : 0;
+
+     // total deposit
+     const buypolres = await stake2.aggregate([
+      {
+        $match: { user: address } // Match the specific receiver
+      },
+      {
+        $group: {
+          _id: "$user",
+          totalIncome: { $sum: "$amount" } // Sum the income field
+        }
+      }
+    ]);
+
+    const totaldeposit = buypolres.length > 0 ? buypolres[0].totalIncome : 0;
+    //club income
+
+     
+
+    res.status(200).json({ 
+      userDetails, 
+      levelinc : leveincome,
+      yieldincome : dividentinco,
+      // clubinc : clubinco,
+      totdeposit : totaldeposit,
+      totalIncome : leveincome + dividentinco + 0,
+      walletBalance : wallet_balance 
+      })
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 router.post('/dashboarddetails', async (req, res) => {
   const { wallet_address } = req.body;
 
