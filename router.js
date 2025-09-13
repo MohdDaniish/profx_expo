@@ -4307,10 +4307,6 @@ router.get("/userDetailsbyIdd", async (req, res) => {
       wallet_balance = walletdetail.wallet_income
     }
 
-    if (!userDetails) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
 
     // level income
     const levincome = await levelStake.aggregate([
