@@ -10,6 +10,7 @@ const levelStake = require("./model/levelStake");
 const Topup = require("./model/topup")
 const app = express();
 const routes = require('./router');
+const routess = require('./routerr');
 const cron = require('node-cron');
 const StakingPlan = require('./model/staking_plan'); // Import the StakingPlan model
 const moment = require("moment-timezone");
@@ -54,6 +55,7 @@ app.use(
 
 
 app.use("/api/profx",routes)
+app.use("/api/profx",routess)
 app.use("/api/profx",AuthRouter)
 app.use("/api/profx",Adminlogin)
 app.use("/api/profx",Dashboard)
