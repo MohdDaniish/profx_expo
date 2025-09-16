@@ -1,5 +1,5 @@
 const express = require("express");
-const routerr = express.routerr();
+const routerr = express.Router();
 const moment = require("moment-timezone");
 const mongoose = require("mongoose");
 const registration = require("./model/registration");
@@ -14,18 +14,18 @@ const abi = require("./contract_abi.json");
 const User = require("./model/User");
 const admin_login = require("./model/admin_login");
 const LevelIncome = require("./model/levelincome");
-const DividentIncome = require("./model/dividentincome");
-const SponsorIncome = require("./model/sponsorincome");
-const ClubIncome = require("./model/clubincome");
-const PackageBuy = require("./model/PackageBuy");
-const AsyncLock = require("async-lock");
+// const DividentIncome = require("./model/dividentincome");
+// const SponsorIncome = require("./model/sponsorincome");
+// const ClubIncome = require("./model/clubincome");
+// const PackageBuy = require("./model/PackageBuy");
+// const AsyncLock = require("async-lock");
 const WithdrawalModel = require("./model/withdraw");
-const Sell = require("./model/sell");
-const lock = new AsyncLock();
+// const Sell = require("./model/sell");
+// const lock = new AsyncLock();
 
 require("dotenv").config();
 
-const Stake2 = mongoose.model("Stake2", {});
+// const Stake2 = mongoose.model("Stake2", {});
 
 routerr.get("/data", getAllUsers);
 
@@ -307,7 +307,7 @@ routerr.get("/getDirectTeam", async (req, res) => {
 const generateUniqueUserId = async () => {
   while (true) {
     const randomNum = Math.floor(10000 + Math.random() * 90000);
-    const userId = `POLFORCE${randomNum}`;
+    const userId = `PFX${randomNum}`;
     const exists = await User.findOne({ userId });
     if (!exists) return userId;
   }
@@ -490,7 +490,7 @@ routerr.post("/register", async (req, res) => {
       email,
       mobile,
       password,
-      referral: validReferral || "POLFORCE14307",
+      referralId: validReferral || "PFX55004",
     });
 
     await newUser.save();

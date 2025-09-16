@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
       trim: true,
+      unique: true,
       validate: {
         validator: function (v) {
           return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -40,6 +41,12 @@ const userSchema = new mongoose.Schema(
     },
     referral: {
       type: String,
+      default: null,
+      trim: true,
+    },
+    referralId: {
+      type: String,
+      required: true,
     },
     address: { type: String, default: null},
   },
