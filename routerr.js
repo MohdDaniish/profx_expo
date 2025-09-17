@@ -493,7 +493,23 @@ routerr.post("/register", async (req, res) => {
       referralId: validReferral || "PFX55004",
     });
 
-    await newUser.save();
+    const isdoon = await newUser.save();
+
+    if(isdoon){
+      const regis = new registration({
+        userId : userId,
+        uId : isdoon._id,
+        user : isdoon.address,
+        referrerId : validReferral || "PFX55004",
+        rId : validReferral ? (await User.findOne({ userId: validReferral }))._id : (await User.findOne({ userId: "PFX55004" }))._id,
+        referrer : validReferral || "PFX55004",
+        txHash : "0x0",
+        block : 0,
+        timestamp : 0
+      })
+  
+      await regis.save()
+    }
 
     res.status(201).json({
       message: "User registered successfully",
