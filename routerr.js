@@ -21,6 +21,7 @@ const LevelIncome = require("./model/levelincome");
 // const AsyncLock = require("async-lock");
 const WithdrawalModel = require("./model/withdraw");
 const { default: transfer } = require("./model/transfer");
+const stake2 = require("./model/stake");
 // const Sell = require("./model/sell");
 // const lock = new AsyncLock();
 
@@ -1320,5 +1321,99 @@ routerr.post("/transfer", async (req, res) => {
     res.status(500).json({ success: false, msg: "Internal server error" });
   }
 });
+
+routerr.post("/stake", async (req, res) => {
+  try {
+    const { userId, planId, amount } = req.body;
+
+    if (!userId || !planId || !amount) {
+      return res.status(400).json({ success: false, msg: "Missing fields" });
+    }
+
+    if (amount <= 0) {
+      return res.status(400).json({ success: false, msg: "Invalid staking amount" });
+    }
+
+      // ✅ Minimum staking amounts for each plan
+      const minAmounts = {
+        1: 50,
+        2: 500,
+        3: 2500,
+        4: 5000,
+        5: 10000,
+      };
+  
+      if (!minAmounts[planId]) {
+        return res.status(400).json({ success: false, msg: "Invalid plan selected" });
+      }
+  
+      if (amount < minAmounts[planId]) {
+        return res.status(400).json({
+          success: false,
+          msg: `Minimum stake amount for this plan is ${minAmounts[planId]}`,
+        });
+      }
+
+    // Deduct from user only if topup_amount >= amount
+    const user = await registration.findOneAndUpdate(
+      { userId, topup_amount: { $gte: amount } }, // condition
+      { $inc: { topup_amount: -amount } },        // deduct amount
+      { new: true }
+    );
+
+    if (!user) {
+      return res.json({ success: false, msg: "Insufficient balance or invalid user" });
+    }
+
+    // Calculate ROI, package name, lockin days
+    const result = calculateIncomeAndPackage(amount, planId);
+    const perday = result.perDayIncome;
+    const lockin = result.lockinDays;
+
+    // Create stake record
+    const newStake = await stake2.create({
+      user: userId,
+      amount: amount,
+      perdayroi: perday,
+      plan: planId,
+      planname: result.packageName,
+      plantype: planId,
+      stakeType: "manual", // since it's API now (not from contract)
+      lockindays: lockin,
+      createdAt: new Date(),
+    });
+
+    return res.json({ success: true, msg: "Stake created successfully", stake: newStake });
+  } catch (err) {
+    console.error("Stake Error:", err);
+    res.status(500).json({ success: false, msg: "Internal server error" });
+  }
+});
+
+function calculateIncomeAndPackage(investment, planId) {
+  let monthlyRate, packageName, lockinDays;
+
+  if (planId == 1) {
+    monthlyRate = 0.10; packageName = "Precious Metals"; lockinDays = 90;
+  } else if (planId == 2) {
+    monthlyRate = 0.15; packageName = "Real Estate"; lockinDays = 180;
+  } else if (planId == 3) {
+    monthlyRate = 0.20; packageName = "US Stocks"; lockinDays = 360;
+  } else if (planId == 4) {
+    monthlyRate = 0.24; packageName = "Forex Market"; lockinDays = 720;
+  } else if (planId == 5) {
+    monthlyRate = 0.30; packageName = "Digital Assets"; lockinDays = 1080;
+  } else {
+    throw new Error("Invalid planId provided");
+  }
+
+  const perDayIncome = (investment * monthlyRate) / 30;
+
+  return {
+    perDayIncome: perDayIncome.toFixed(2),
+    packageName,
+    lockinDays
+  };
+}
 
 module.exports = routerr;
