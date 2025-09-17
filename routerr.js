@@ -20,6 +20,7 @@ const LevelIncome = require("./model/levelincome");
 // const PackageBuy = require("./model/PackageBuy");
 // const AsyncLock = require("async-lock");
 const WithdrawalModel = require("./model/withdraw");
+const { default: transfer } = require("./model/transfer");
 // const Sell = require("./model/sell");
 // const lock = new AsyncLock();
 
@@ -498,10 +499,10 @@ routerr.post("/register", async (req, res) => {
     if(isdoon){
       const regis = new registration({
         userId : userId,
-        uId : isdoon._id,
+        uId : 0,
         user : isdoon.address,
         referrerId : validReferral || "PFX55004",
-        rId : validReferral ? (await User.findOne({ userId: validReferral }))._id : (await User.findOne({ userId: "PFX55004" }))._id,
+        rId : 0,
         referrer : validReferral || "PFX55004",
         txHash : "0x0",
         block : 0,
@@ -1265,6 +1266,59 @@ routerr.get('/random-number', (req, res) => {
   res.json({
       randomNumber: randomNumber
   });
+});
+
+routerr.post("/transfer", async (req, res) => {
+  try {
+    const { senderId, receiverId, amount } = req.body;
+    if (!senderId || !receiverId || !amount) {
+      return res.status(400).json({ success: false, msg: "Missing fields" });
+    }
+
+    if (senderId === receiverId) {
+      return res.json({ success: false, msg: "Sender and Receiver cannot be same" });
+    }
+
+    if (Number(amount) < 50) {
+      return res.json({ success: false, msg: "Minimum transfer amount is 50" });
+    }
+
+    // Deduct from sender only if balance >= amount
+    const senderUpdate = await registration.findOneAndUpdate(
+      { userId: senderId, topup_amount: { $gte: amount } }, // condition
+      { $inc: { topup_amount: -amount } }, // deduct
+      { new: true }
+    );
+
+    if (!senderUpdate) {
+      return res.json({ success: false, msg: "Insufficient balance or invalid sender" });
+    }
+
+    // Credit receiver
+    const receiverUpdate = await registration.findOneAndUpdate(
+      { userId: receiverId },
+      { $inc: { topup_amount: Number(amount) } },
+      { new: true }
+    );
+
+    if (!receiverUpdate) {
+      // rollback sender deduction if receiver not found
+      await registration.findOneAndUpdate(
+        { userId: senderId },
+        { $inc: { topup_amount: Number(amount) } }
+      );
+      return res.json({ success: false, msg: "Invalid receiver" });
+    }
+
+    // Save transfer record
+    const transferRecord = new transfer({ senderId, receiverId, amount });
+    await transferRecord.save();
+
+    return res.json({ success: true, msg: "Transfer successful", transfer: transferRecord });
+  } catch (err) {
+    console.error("Transfer Error:", err);
+    res.status(500).json({ success: false, msg: "Internal server error" });
+  }
 });
 
 module.exports = routerr;

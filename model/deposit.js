@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 const depositSchema = new Schema(
   {
       user: { type:  String,required: true },
+      userId: { type:  String,required: true },
       amount: { type:  Number,required: true },
       txHash: { type:  String,required: true },
       block: { type:  String,required: true },
