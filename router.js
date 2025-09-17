@@ -4297,11 +4297,11 @@ router.post('/userDetailsbyWallet', async (req, res) => {
 
 router.get("/userDetailsbyIdd", async (req, res) => {
   try {
-    const { address } = req.query;
+    const { userId } = req.query;
 
 
     let wallet_balance = 0;
-    const walletdetail = await registration.findOne({ user : address });
+    const walletdetail = await registration.findOne({ userId : userId });
 
     if(walletdetail){
       wallet_balance = walletdetail.wallet_income
