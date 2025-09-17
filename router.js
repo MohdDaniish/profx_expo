@@ -4311,7 +4311,7 @@ router.get("/userDetailsbyIdd", async (req, res) => {
     // level income
     const levincome = await levelStake.aggregate([
       {
-        $match: { receiver: address } // Match the specific receiver
+        $match: { receiver: userId } // Match the specific receiver
       },
       {
         $group: {
@@ -4327,7 +4327,7 @@ router.get("/userDetailsbyIdd", async (req, res) => {
     // divident income
     const divres = await dailyroi.aggregate([
       {
-        $match: { user: address } // Match the specific receiver
+        $match: { user: userId } // Match the specific receiver
       },
       {
         $group: {
@@ -4358,7 +4358,7 @@ router.get("/userDetailsbyIdd", async (req, res) => {
      // total deposit
      const buypolres = await stake2.aggregate([
       {
-        $match: { user: address } // Match the specific receiver
+        $match: { userId: userId } // Match the specific receiver
       },
       {
         $group: {
