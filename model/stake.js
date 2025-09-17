@@ -22,9 +22,9 @@ const stake2Schema = new Schema(
       incomesentroi: { type: Number,default:0},
       lockindays: { type: Number,default:0},
       send_status : { type: String,default : 0},
-      txHash: { type:  String,required: true },
-      block: { type:  String,required: true },
-      timestamp: { type:  String,required: true },
+      // txHash: { type:  String,required: true },
+      // block: { type:  String,required: true },
+      // timestamp: { type:  String,required: true },
       createdAt: {
         type: Date,
         default: Date.now,

@@ -399,23 +399,13 @@ router.post("/get-stake-history", async (req, res) => {
 
     // Fetch data from Stake2 and Topup collections simultaneously
     const [stakeData, topupData] = await Promise.all([
-      Stake2.find({ user: wallet_address }),
-      Topup.find({ user: wallet_address })
+      Stake2.find({ userId: wallet_address })
     ]);
 
-    // Prepare data from Topup schema to match the structure of Stake2 schema
-    const formattedTopupData = topupData.map(topup => ({
-      user: topup.user,
-      amount: topup.amount,
-      token: topup.token/1e18,
-      txHash: topup.txHash,
-      timestamp: topup.timestamp,
-      createdAt: topup.createdAt,
-      updatedAt: topup.updatedAt 
-    }));
+  
 
     // Merge data from both collections
-    const mergedData = [...stakeData, ...formattedTopupData];
+    const mergedData = [...stakeData];
 
     // Send the merged data as a response
     res.json(mergedData);
@@ -1730,14 +1720,14 @@ router.post('/directmember', async (req, res) => {
     const { walletAddress } = req.body;
   
     // Find all direct members by referrer
-    const directMembers = await registration.find({ referrer: walletAddress });
+    const directMembers = await registration.find({ referrerId: walletAddress });
   
     // Use Promise.all to process all direct members concurrently
     const directMembersWithDetails = await Promise.all(directMembers.map(async (member) => {
       // Find the name from the signup schema
      
       // Find the topup_amount from the stageregister schema
-      const stakeRegisterRecord = await registration.findOne({ user: member.user });
+      const stakeRegisterRecord = await registration.findOne({ userId: member.userId });
       const topupAmount = stakeRegisterRecord ? stakeRegisterRecord.stake_amount : 0;
   
       // Add the name and total_staking to the member data

@@ -1325,7 +1325,6 @@ routerr.post("/transfer", async (req, res) => {
 routerr.post("/stake", async (req, res) => {
   try {
     const { userId, planId, amount } = req.body;
-
     if (!userId || !planId || !amount) {
       return res.status(400).json({ success: false, msg: "Missing fields" });
     }
@@ -1372,7 +1371,7 @@ routerr.post("/stake", async (req, res) => {
 
     // Create stake record
     const newStake = await stake2.create({
-      user: userId,
+      userId: userId,
       amount: amount,
       perdayroi: perday,
       plan: planId,
