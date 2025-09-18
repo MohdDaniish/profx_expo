@@ -1315,8 +1315,14 @@ routerr.post("/transfer", async (req, res) => {
     }
 
     // Save transfer record
-    const transferRecord = new transfer({ senderId, receiverId, amount });
-    await transferRecord.save();
+    const transferRecord = await transfer.create({
+      senderId,
+      receiverId,
+      amount,
+      createdAt: new Date(),
+    })
+    // const transferRecord = new transfer({ senderId, receiverId, amount });
+    // await transferRecord.save();
 
     return res.json({ success: true, msg: "Transfer successful", transfer: transferRecord });
   } catch (err) {
