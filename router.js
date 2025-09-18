@@ -487,7 +487,7 @@ const openlevel = require("./model/openlevels");
 const stakeReward = require("./model/stakingReward");
 const stakepoolincome = require("./model/stakepoolincome");
 const deposit = require("./model/deposit");
-const { default: transfer } = require("./model/transfer");
+const transfer  = require("./model/transfer");
 
 router.get("/tvl", async (req, res) => {
   try {

@@ -8,4 +8,6 @@ const transferSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model("Transfer", transferSchema);
+const Transfer = mongoose.model("transfer", transferSchema);
+
+module.exports = Transfer;
