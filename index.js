@@ -1480,7 +1480,7 @@ async function roiwallet(){
    
 const stakings = await stake2.find({}).lean();
 const calculatedDataList = await Promise.all(stakings.map(async entry => {
-  const stakeregis = await registration.findOne({ user: entry.user }, { return: 1, totalIncome: 1 });
+  const stakeregis = await registration.findOne({ userId: entry.userId });
       if (stakeregis) {
         const perdayroi = entry.perdayroi;
         const allincome = stakeregis.totalIncome ? stakeregis.totalIncome : 0;
@@ -1488,7 +1488,7 @@ const calculatedDataList = await Promise.all(stakings.map(async entry => {
         const income_status = stakeregis.return >= total ? "Credit" : "Lapse Capping";
         if(income_status == "Credit"){
         return {
-          user: entry.user,
+          userId: entry.userId,
           stakeid: entry._id.toString(),
           income: perdayroi,
           amount: entry.amount,
@@ -1497,8 +1497,7 @@ const calculatedDataList = await Promise.all(stakings.map(async entry => {
           income_status: income_status,
           totalIncome: allincome,
           capping: stakeregis.return,
-          send_status: entry.send_status,
-          txHash: entry.txHash
+          send_status: entry.send_status
         };
         } else {
         return null;
@@ -2263,14 +2262,14 @@ async function levelOnRoi() {
 
       for (const rec of allrois) {
         try {
-          const oku = await registration.findOne({ user: rec.user, referrerId: { $ne: 0 } }, { referrer: 1, totalIncome: 1, return: 1 }).lean().exec();
+          const oku = await registration.findOne({ userId: rec.user, referrerId: { $ne: 0 } }, { referrer: 1, totalIncome: 1, return: 1 }).lean().exec();
           if (oku) {
-            let currentReferrerId = oku.referrer;
+            let currentReferrerId = oku.referrerId;
             let i = 1;
 
             while (currentReferrerId) {
               try {
-                const record = await registration.findOne({ user: currentReferrerId }, { directStakeCount: 1, referrer: 1, totalIncome: 1, return: 1 }).lean().exec();
+                const record = await registration.findOne({ userId: currentReferrerId }, { directStakeCount: 1, referrer: 1, totalIncome: 1, return: 1 }).lean().exec();
                 if (!record) break;
 
                 let iselig = 0;
@@ -2303,7 +2302,7 @@ async function levelOnRoi() {
 
                  // if (record.return >= nowinc) {
                     await registration.updateOne(
-                      { user: currentReferrerId },
+                      { userId: currentReferrerId },
                       {
                         $inc: {
                           totalIncome: incomeData.income,
@@ -2313,26 +2312,26 @@ async function levelOnRoi() {
                       }
                     );
 
-                    await stake2.updateOne(
-                      { txHash: rec.txHash },
-                      {
-                        $inc: {
-                          incomesent: incomeData.income,
-                        },
-                      }
-                    );
+                    // await stake2.updateOne(
+                    //   { txHash: rec.txHash },
+                    //   {
+                    //     $inc: {
+                    //       incomesent: incomeData.income,
+                    //     },
+                    //   }
+                    // );
 
                     levelStakeOps.push({
                       insertOne: {
                         document: {
-                          sender: rec.user,
+                          sender: rec.userId,
                           receiver: currentReferrerId,
                           level: incomeData.level,
                           amount: rec.amount,
                           income: incomeData.income,
                           percent: incomeData.percent,
                           income_type: incomeData.type,
-                          txHash: rec.txHash,
+                          txHash: "",
                         },
                       },
                     });
@@ -2347,7 +2346,7 @@ async function levelOnRoi() {
 
                 i++;
                 if (i === 21) break;
-                currentReferrerId = record.referrer;
+                currentReferrerId = record.referrerId;
               } catch (innerError) {
                 console.error(`Error processing level income for referrerId ${currentReferrerId}: `, innerError);
               }

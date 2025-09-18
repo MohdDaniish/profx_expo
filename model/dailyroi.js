@@ -7,7 +7,7 @@ const dailyroiSchema = new Schema({
     type: String,
     required: true
   },
-  user: {
+  userId: {
     type: String,
     required: true
   },
@@ -37,7 +37,7 @@ const dailyroiSchema = new Schema({
     type: String,
     default : 0
   },
-  txHash: { type:  String,required: true },
+  txHash: { type:  String, default: null },
   insertedAt: {
     type: Date,
     default: () => moment().utcOffset('+05:30').format()
