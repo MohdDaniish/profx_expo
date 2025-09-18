@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const transferSchema = new mongoose.Schema({
   senderId: { type: String, required: true },
