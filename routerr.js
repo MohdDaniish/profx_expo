@@ -505,6 +505,9 @@ routerr.post("/register", async (req, res) => {
         referrerId : validReferral || "PFX55004",
         rId : 0,
         referrer : validReferral || "PFX55004",
+        name : name || null,
+        email : email || null,
+        mobile : mobile || null,
         txHash : "0x0",
         block : 0,
         timestamp : 0

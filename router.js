@@ -486,6 +486,8 @@ const poolincometransfer = require("./model/poolincometransfer");
 const openlevel = require("./model/openlevels");
 const stakeReward = require("./model/stakingReward");
 const stakepoolincome = require("./model/stakepoolincome");
+const deposit = require("./model/deposit");
+const { default: transfer } = require("./model/transfer");
 
 router.get("/tvl", async (req, res) => {
   try {
@@ -1742,6 +1744,46 @@ router.post('/directmember', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
+  }
+});
+
+router.get("/deposits/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const depositss = await deposit.find({ userId }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: depositss.length,
+      data: depositss,
+    });
+  } catch (error) {
+    console.error("Error fetching deposits:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+/**
+ * GET /api/transfers/:userId
+ * Get all transfers by userId (as sender or receiver)
+ */
+router.get("/transfers/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const transferss = await transfer.find({
+      $or: [{ senderId: userId }, { receiverId: userId }],
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: transferss.length,
+      data: transferss,
+    });
+  } catch (error) {
+    console.error("Error fetching transfers:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
