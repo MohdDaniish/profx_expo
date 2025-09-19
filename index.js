@@ -2594,7 +2594,7 @@ cron.schedule('*/2 * * * *', async () => {
  
 });
 
- cron.schedule('*/50 * * * *', async () => {  // for testing
+ cron.schedule('* * * * *', async () => {  // for testing
  roiwallet();
  });
 
