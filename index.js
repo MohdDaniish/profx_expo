@@ -1757,20 +1757,22 @@ async function findAllDescendants(referrer) {
 
   while (currentLevel.length > 0) {
     const directMembers = await registration.aggregate([
-      { $match: { referrer: { $in: currentLevel } } },
-      { $group: { _id: null, users: { $addToSet: "$user" } } }
+      { $match: { referrerId: { $in: currentLevel } } },
+      { $group: { _id: null, users: { $addToSet: "$userId" } } }
     ]);
 
     if (directMembers.length === 0) {
       break;
     }
 
-    currentLevel = directMembers[0].users;
 
-    if (!firstIteration) {
-      currentLevel.forEach(id => allUserIds.add(id));
-    }
-    firstIteration = false;
+    currentLevel = directMembers[0].users;
+    currentLevel.forEach(id => allUserIds.add(id));
+
+    // if (!firstIteration) {
+    //   currentLevel.forEach(id => allUserIds.add(id));
+    // }
+    // firstIteration = false;
   }
 
   return Array.from(allUserIds);
@@ -1779,15 +1781,17 @@ async function findAllDescendants(referrer) {
 async function setTeamBusiness() {
   try {
     // Step 1: Get all users from stakeRegister
-    const allUsers = await registration.distinct('user');
+    const allUsers = await registration.distinct('userId');
     
     // Step 2: For each user, find all team members recursively and sum their investments
     for (const user of allUsers) {
+      console.log("user ",user)
       const allTeamMembers = await findAllDescendants(user);
+     
       const dirbizz = await calculateDirectsesy(user);
       // Aggregate amounts from stake2 schema
       const stake2Result = await stake2.aggregate([
-        { $match: { user: { $in: allTeamMembers } } },
+        { $match: { userId: { $in: allTeamMembers } } },
         { $group: { _id: null, totalAmount: { $sum: '$amount' } } }
       ]);
 
@@ -1798,7 +1802,7 @@ async function setTeamBusiness() {
       const directplus = totalAmount + dirbizz;
       // Update the registration collection with the total team business amount
       await registration.updateOne(
-        { user: user },
+        { userId: user },
         {
           $set: {
             staketeambusiness: totalAmount,
@@ -1849,12 +1853,12 @@ async function calculateDirects(walletAddress) {
 async function calculateDirectsesy(walletAddress) {
   try {
     // Step 1: Find direct members from the registration schema
-    const directMembers = await stakedirect.find({ referrer: walletAddress }).select('user');
-    const userIds = directMembers.map(member => member.user);
+    const directMembers = await stakedirect.find({ referrerId: walletAddress }).select('userId');
+    const userIds = directMembers.map(member => member.userId);
 
     // Step 2: Find corresponding records in the stakeRegister schema and sum the topupAmount
     const stakeRegisterResult = await registration.aggregate([
-      { $match: { user: { $in: userIds } } },
+      { $match: { userId: { $in: userIds } } },
       { $group: { _id: null, totalAmount: { $sum: '$stake_amount' } } }
     ]);
     const stakeRegisterTotalAmount = stakeRegisterResult.length > 0 ? stakeRegisterResult[0].totalAmount : 0;
@@ -2564,7 +2568,7 @@ async function updateStakeIncomeSentROI() {
   }
 }
 
-cron.schedule('*/50 * * * *', async () => {
+cron.schedule('*/10 * * * *', async () => {
   setTeamBusiness();
   // await updateStakeTeamBusiness();
   // await updateTopupTeamBusiness();
