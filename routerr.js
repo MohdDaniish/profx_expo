@@ -595,7 +595,7 @@ routerr.post("/login", async (req, res) => {
     }
 
     // Fetch registration data by userId (assuming both schemas share userId)
-    const registrationn = await registration.findOne({ userId: user.userId });
+    const registrationn = await registration.findOne({ userId: userr.userId });
 
     let user = userr.toObject();
 
