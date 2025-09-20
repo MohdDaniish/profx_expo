@@ -2,7 +2,6 @@ const express = require("express");
 const routerr = express.Router();
 const moment = require("moment-timezone");
 const mongoose = require("mongoose");
-const registration = require("./model/registration");
 const { getAllUsers } = require("./test");
 const withdraw = require("./model/withdraw");
 const signup = require("./model/signup");
