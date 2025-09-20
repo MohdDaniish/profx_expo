@@ -23,6 +23,7 @@ const WithdrawalModel = require("./model/withdraw");
 const transfer = require("./model/transfer");
 const stake2 = require("./model/stake");
 const stakedirect = require("./model/stakedirects");
+const registration = require("./model/registration");
 // const Sell = require("./model/sell");
 // const lock = new AsyncLock();
 
@@ -555,7 +556,7 @@ routerr.put("/updateWallet", async (req, res) => {
   }
 });
 
-routerr.post("/login", async (req, res) => {
+routerr.post("/loginn", async (req, res) => {
   try {
     const { identifier, password } = req.body;
 
@@ -573,6 +574,49 @@ routerr.post("/login", async (req, res) => {
 
     res.status(200).json({ message: "Login successful", user });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+routerr.post("/login", async (req, res) => {
+  try {
+    const { identifier, password } = req.body;
+
+    if (!identifier || !password) {
+      return res.status(400).json({ error: "Both fields are required" });
+    }
+
+    // Find user by email or mobile
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { mobile: identifier }],
+    });
+
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Fetch registration data by userId (assuming both schemas share userId)
+    const registrationn = await registration.findOne({ userId: user.userId });
+
+    let mergedUser = user.toObject();
+
+    if (registrationn) {
+      const regData = registrationn.toObject();
+
+      // Merge registration fields into user, but skip fields with same name
+      Object.keys(regData).forEach((key) => {
+        if (!mergedUser.hasOwnProperty(key)) {
+          mergedUser[key] = regData[key];
+        }
+      });
+    }
+
+    res.status(200).json({
+      message: "Login successful",
+      user: mergedUser,
+    });
+  } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ error: err.message });
   }
 });
