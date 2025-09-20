@@ -1485,8 +1485,8 @@ const calculatedDataList = await Promise.all(stakings.map(async entry => {
         const perdayroi = entry.perdayroi;
         const allincome = stakeregis.totalIncome ? stakeregis.totalIncome : 0;
         const total = allincome + perdayroi;
-        const income_status = stakeregis.return >= total ? "Credit" : "Lapse Capping";
-        if(income_status == "Credit"){
+        // const income_status = stakeregis.return >= total ? "Credit" : "Lapse Capping";
+        // if(income_status == "Credit"){
         return {
           userId: entry.userId,
           stakeid: entry._id.toString(),
@@ -1494,14 +1494,14 @@ const calculatedDataList = await Promise.all(stakings.map(async entry => {
           amount: entry.amount,
           ratio: entry.ratio,
           token: entry.token,
-          income_status: income_status,
+          income_status: "Credit",
           totalIncome: allincome,
           capping: stakeregis.return,
           send_status: entry.send_status
         };
-        } else {
-        return null;
-        }
+        // } else {
+        // return null;
+        // }
       } else {
         console.log("No ROI data found for user:", entry.user);
         return null;
@@ -1516,15 +1516,15 @@ const calculatedDataList = await Promise.all(stakings.map(async entry => {
      if (data.income_status === "Credit") {
         return {
           updateOne: {
-            filter: { user: data.user },
+            filter: { userId: data.userId },
             update: { $inc: { wallet_income: data.income, roiincome: data.income, totalIncome : data.income } }
           }
         };
       } else {
         return {
           updateOne: {
-            filter: { user: data.user },
-            update: { $inc: { wallet_lapse: data.income } }
+            filter: { userId: data.user },
+            update: { $inc: { wallet_income: 0 } }
           }
         };
       }
@@ -2255,22 +2255,25 @@ console.log("planname ",planname)
 async function levelOnRoi() {
   try {
     const allrois = await dailyroi.find({ level_status: 0 }).limit(200).lean().exec();
-    console.log("allrois: ", allrois);
+   // console.log("allrois: ", allrois);
 
     if (allrois.length > 0) {
       const levelStakeOps = [];
 
       for (const rec of allrois) {
         try {
-          const oku = await registration.findOne({ userId: rec.user, referrerId: { $ne: 0 } }, { referrer: 1, totalIncome: 1, return: 1 }).lean().exec();
+          const oku = await registration.findOne({ userId: rec.userId, referrerId: { $ne: 0 } }, { referrerId: 1, referrer: 1, totalIncome: 1, return: 1 }).lean().exec();
           if (oku) {
+            //console.log("oku ", oku);
             let currentReferrerId = oku.referrerId;
             let i = 1;
 
             while (currentReferrerId) {
               try {
-                const record = await registration.findOne({ userId: currentReferrerId }, { directStakeCount: 1, referrer: 1, totalIncome: 1, return: 1 }).lean().exec();
+                const record = await registration.findOne({ userId: currentReferrerId }, { directStakeCount: 1, referrerId :1, referrer: 1, totalIncome: 1, return: 1 }).lean().exec();
                 if (!record) break;
+
+                //console.log("record ", record);
 
                 let iselig = 0;
                 const directStakeCount = record.directStakeCount ? record.directStakeCount : 0;
@@ -2288,6 +2291,8 @@ async function levelOnRoi() {
                 } else if ((i >= 13 && i <= 20) && directStakeCount >= 10) {
                   iselig = 1;
                 }
+
+                //console.log("iselig ", iselig);
 
                 if (iselig === 1) {
                   const incomeData = {
@@ -2584,7 +2589,7 @@ cron.schedule('*/20 * * * *', async () => {
 //  cron.schedule('*/10 * * * *', async () => {
 //   roiwallet();
 //  });
- cron.schedule('*/10 * * * *', async () => {
+ cron.schedule('*/6 * * * *', async () => {
   levelOnRoi();
  });
 
@@ -2594,7 +2599,9 @@ cron.schedule('*/2 * * * *', async () => {
  
 });
 
- cron.schedule('* * * * *', async () => {  // for testing
+//roiwallet();
+
+ cron.schedule('*/5 * * * *', async () => {  // for testing
  roiwallet();
  });
 

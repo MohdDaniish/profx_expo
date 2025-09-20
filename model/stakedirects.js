@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 
 // Define a schema
 const stakedirectSchema = new mongoose.Schema({
-  user: { type: String },
-  referrer: { type: String },
+  userId: { type: String },
+  referrerId: { type: String },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -22,6 +22,7 @@ const admin_login = require("./model/admin_login");
 const WithdrawalModel = require("./model/withdraw");
 const transfer = require("./model/transfer");
 const stake2 = require("./model/stake");
+const stakedirect = require("./model/stakedirects");
 // const Sell = require("./model/sell");
 // const lock = new AsyncLock();
 
@@ -1390,6 +1391,29 @@ routerr.post("/stake", async (req, res) => {
       lockindays: lockin,
       createdAt: new Date(),
     });
+
+    if(newStake){
+
+      await registration.updateOne(
+        { userId: userId },
+        { $inc: { stake_amount: Number(amount) } }
+      );
+
+      const refdet = await registration.findOne({ userId : userId },{referrerId:1 })
+      const refId = refdet.referrerId
+
+      const pil = await stakedirect.findOne({ userId: userId, referrerId : refId })
+      if(!pil){
+        await registration.updateOne(
+         { userId: refId },
+         { $inc: { directStakeCount: 1 } }
+       );
+       await stakedirect.create({
+         userId : userId,
+         referrerId : refId
+       })
+      }
+    }
 
     return res.json({ success: true, msg: "Stake created successfully", stake: newStake });
   } catch (err) {
