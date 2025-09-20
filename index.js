@@ -1785,7 +1785,6 @@ async function setTeamBusiness() {
     
     // Step 2: For each user, find all team members recursively and sum their investments
     for (const user of allUsers) {
-      console.log("user ",user)
       const allTeamMembers = await findAllDescendants(user);
      
       const dirbizz = await calculateDirectsesy(user);
@@ -1807,7 +1806,8 @@ async function setTeamBusiness() {
           $set: {
             staketeambusiness: totalAmount,
             directplusteambiz: directplus,
-            directbusiness : dirbizz
+            directbusiness : dirbizz,
+            allteam :   allTeamMembers.length
           }
         }
       );

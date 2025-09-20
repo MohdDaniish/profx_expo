@@ -53,6 +53,8 @@ const registration = new mongoose.Schema(
     timestamp: { type: Number, required: true },
     cal_status: { type: Number, default: 0 },
     teamBusinessnew: { type: Number, default: 0 },
+    allteam: { type: Number, default: 0 },
+
   },
   { timestamps: true, collection: "registration" }
 );
