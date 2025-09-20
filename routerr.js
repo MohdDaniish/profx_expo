@@ -586,33 +586,33 @@ routerr.post("/login", async (req, res) => {
     }
 
     // Find user by email or mobile
-    const user = await User.findOne({
+    const userr = await User.findOne({
       $or: [{ email: identifier }, { mobile: identifier }],
     });
 
-    if (!user || user.password !== password) {
+    if (!userr || userr.password !== password) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
     // Fetch registration data by userId (assuming both schemas share userId)
     const registrationn = await registration.findOne({ userId: user.userId });
 
-    let mergedUser = user.toObject();
+    let user = userr.toObject();
 
     if (registrationn) {
       const regData = registrationn.toObject();
 
       // Merge registration fields into user, but skip fields with same name
       Object.keys(regData).forEach((key) => {
-        if (!mergedUser.hasOwnProperty(key)) {
-          mergedUser[key] = regData[key];
+        if (!user.hasOwnProperty(key)) {
+          user[key] = regData[key];
         }
       });
     }
 
     res.status(200).json({
       message: "Login successful",
-      user: mergedUser,
+      user,
     });
   } catch (err) {
     console.error("Login error:", err);
